@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ETF ELITE | Institutional Grade Trading Terminal</title>
+    
+    <!-- PRE-LOAD CRITICAL ASSETS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- CORE ENGINE LIBRARIES (CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#00ff88',
+                        secondary: '#ffd700',
+                        bgDeep: '#050505',
+                        surface: '#121212',
+                        glass: 'rgba(255, 255, 255, 0.03)',
+                        danger: '#ff4444',
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    borderRadius: {
+                        'xl': '24px',
+                        '2xl': '32px',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ADVANCED UI SYSTEM */
+        :root {
+            --primary: #00ff88;
+            --secondary: #ffd700;
+            --bg-deep: #050505;
+            --surface: #121212;
+            --trans: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: #ffffff;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Custom Scrollbar - Professional Grade */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+        /* Glassmorphism Effects */
+        .glass-card {
+            background: rgba(18, 18, 18, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .neo-glow { box-shadow: 0 0 20px rgba(0, 255, 136, 0.2); }
+        .gold-glow { box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); }
+
+        /* Layout Transitions */
+        .page-view {
+            display: none;
+            animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .page-view.active { display: block; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Sidebar Hover Effects */
+        .nav-link {
+            transition: var(--trans);
+            position: relative;
+            overflow: hidden;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            left: 0; bottom: 0;
+            width: 0; height: 2px;
+            background: var(--primary);
+            transition: var(--trans);
+        }
+        .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+
+        /* Market Table Optimization */
+        .market-row {
+            transition: var(--trans);
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .market-row:hover {
+            background: rgba(255,255,255,0.02);
+            transform: translateX(5px);
+        }
+
+        /* Loader Animation */
+        .loader-ring {
+            width: 80px; height: 80px;
+            border: 4px solid #111;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Admin Command Lock Overlay */
+        #admin-lock {
+            background: rgba(5, 5, 5, 0.95);
+            backdrop-filter: blur(30px);
+        }
+
+        /* Mobile Bottom Nav Bar */
+        @media (max-width: 768px) {
+            .mobile-nav {
+                position: fixed;
+                bottom: 0; left: 0; width: 100%;
+                background: rgba(10, 10, 10, 0.9);
+                backdrop-filter: blur(20px);
+                border-top: 1px solid rgba(255,255,255,0.1);
+                display: flex;
+                justify-content: space-around;
+                padding: 12px 0;
+                z-index: 1000;
+            }
+            .sidebar { display: none; }
+            .main-content { margin-left: 0 !important; padding-bottom: 80px; }
+        }
+    </style>
+</head>
+<body class="font-sans">
+
+    <!-- SYSTEM LOADER -->
+    <div id="master-loader" class="fixed inset-0 z-[10000] bg-bgDeep flex flex-col items-center justify-center">
+        <div class="loader-ring mb-6"></div>
+        <h2 class="text-primary font-bold tracking-[4px] text-sm">SQL ELITE TERMINAL</h2>
+        <p class="text-gray-500 text-[10px] mt-2 uppercase tracking-widest">Initializing Core Modules...</p>
+    </div>
+
+    <!-- AUTHENTICATION PORTAL -->
+    <div id="auth-view" class="fixed inset-0 z-[9000] bg-bgDeep flex items-center justify-center p-4 overflow-y-auto hidden">
+        <div class="glass-card w-full max-w-md p-8 rounded-2xl border-primary/20">
+            <div class="text-center mb-10">
+                <i class="fas fa-shield-halved text-5xl text-primary mb-4 drop-shadow-[0_0_10px_#00ff88]"></i>
+                <h1 class="text-3xl font-extrabold tracking-tight">SQL <span class="text-primary">ELITE</span></h1>
+                <p class="text-gray-400 text-sm mt-2">Institutional Grade Investment Gateway</p>
+            </div>
+
+            <!-- Login Pane -->
+            <div id="login-pane">
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Terminal ID (Phone)</label>
+                        <input type="text" id="login-phone" class="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 focus:border-primary outline-none transition-all" placeholder="+91 00000 00000">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Access Key</label>
+                        <input type="password" id="login-pass" class="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 focus:border-primary outline-none transition-all" placeholder="••••••••">
+                    </div>
+                    <button onclick="handleAuth('login')" class="w-full bg-primary text-black font-extrabold py-4 rounded-xl neo-glow hover:scale-[1.02] active:scale-[0.98] transition-all">INITIALIZE SESSION</button>
+                    <p class="text-center text-gray-500 text-sm mt-6">New Operator? <span onclick="toggleAuth('reg')" class="text-primary font-bold cursor-pointer underline">Create Identity</span></p>
+                </div>
+            </div>
+
+            <!-- Register Pane -->
+            <div id="reg-pane" class="hidden">
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Full Name</label>
+                        <input type="text" id="reg-name" class="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 focus:border-primary outline-none transition-all" placeholder="John Doe">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Phone Number</label>
+                        <input type="text" id="reg-phone" class="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 focus:border-primary outline-none transition-all" placeholder="+91 00000 00000">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Access Key</label>
+                        <input type="password" id="reg-pass" class="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 focus:border-primary outline-none transition-all" placeholder="Create Password">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Confirm Key</label>
+                        <input type="password" id="reg-confirm" class="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 focus:border-primary outline-none transition-all" placeholder="Verify Password">
+                    </div>
+                    <button onclick="handleAuth('register')" class="w-full bg-primary text-black font-extrabold py-4 rounded-xl neo-glow hover:scale-[1.02] active:scale-[0.98] transition-all">CREATE IDENTITY</button>
+                    <p class="text-center text-gray-500 text-sm mt-6">Already Identified? <span onclick="toggleAuth('login')" class="text-primary font-bold cursor-pointer underline">Login to Terminal</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP SHELL -->
+    <div id="app-shell" class="flex min-h-screen hidden">
+        
+        <!-- SIDEBAR (Desktop) -->
+        <aside class="sidebar w-72 h-screen fixed left-0 top-0 bg-surface border-r border-white/5 p-6 flex flex-col z-50">
+            <div class="flex items-center gap-4 mb-12 px-2">
+                <i class="fas fa-microchip text-3xl text-primary drop-shadow-[0_0_8px_#00ff88]"></i>
+                <h3 class="text-xl font-black tracking-tighter">SQL <span class="text-primary">ELITE</span></h3>
+            </div>
+
+            <nav class="flex-grow space-y-2">
+                <div class="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-4 px-4">Navigation</div>
+                <button onclick="switchPage('home', this)" class="nav-link active w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold">
+                    <i class="fas fa-house-chimney w-6"></i><span>Dashboard</span>
+                </button>
+                <button onclick="switchPage('market', this)" class="nav-link w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold">
+                    <i class="fas fa-chart-line w-6"></i><span>Live Market</span>
+                </button>
+                <button onclick="switchPage('invest', this)" class="nav-link w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold">
+                    <i class="fas fa-vault w-6"></i><span>Investment Plans</span>
+                </button>
+                
+                <div class="text-[10px] font-bold text-gray-600 uppercase tracking-widest mt-8 mb-4 px-4">Personal</div>
+                <button onclick="switchPage('wallet', this)" class="nav-link w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold">
+                    <i class="fas fa-wallet w-6"></i><span>My Assets</span>
+                </button>
+                <button onclick="switchPage('referral', this)" class="nav-link w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold">
+                    <i class="fas fa-users-viewfinder w-6"></i><span>Referral Network</span>
+                </button>
+
+                <div class="text-[10px] font-bold text-gray-600 uppercase tracking-widest mt-8 mb-4 px-4">System</div>
+                <button onclick="switchPage('support', this)" class="nav-link w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold">
+                    <i class="fas fa-headset w-6"></i><span>Elite Support</span>
+                </button>
+                <button onclick="switchPage('admin', this)" class="nav-link w-full flex items-center gap-4 px-4 py-3 rounded-xl text-secondary/70 hover:text-secondary hover:bg-secondary/5 font-semibold">
+                    <i class="fas fa-user-shield w-6"></i><span>Command Center</span>
+                </button>
+            </nav>
+
+            <div class="mt-auto pt-6 border-t border-white/5">
+                <div onclick="switchPage('profile')" class="flex items-center gap-4 p-3 rounded-xl bg-black/40 hover:bg-black/60 cursor-pointer transition-all">
+                    <img id="user-pfp-side" src="https://via.placeholder.com/100" class="w-10 h-10 rounded-full border-2 border-primary object-cover">
+                    <div class="overflow-hidden">
+                        <h4 id="user-name-side" class="text-sm font-bold truncate">Operator</h4>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Level 1 Trader</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MOBILE BOTTOM NAV -->
+        <div class="mobile-nav">
+            <button onclick="switchPage('home')" class="text-gray-500 hover:text-primary flex flex-col items-center gap-1">
+                <i class="fas fa-house-chimney text-lg"></i><span class="text-[10px] font-bold">Home</span>
+            </button>
+            <button onclick="switchPage('market')" class="text-gray-500 hover:text-primary flex flex-col items-center gap-1">
+                <i class="fas fa-chart-line text-lg"></i><span class="text-[10px] font-bold">Market</span>
+            </button>
+            <button onclick="switchPage('invest')" class="text-gray-500 hover:text-primary flex flex-col items-center gap-1">
+                <i class="fas fa-vault text-lg"></i><span class="text-[10px] font-bold">Invest</span>
+            </button>
+            <button onclick="switchPage('wallet')" class="text-gray-500 hover:text-primary flex flex-col items-center gap-1">
+                <i class="fas fa-wallet text-lg"></i><span class="text-[10px] font-bold">Wallet</span>
+            </button>
+            <button onclick="switchPage('profile')" class="text-gray-500 hover:text-primary flex flex-col items-center gap-1">
+                <i class="fas fa-user text-lg"></i><span class="text-[10px] font-bold">Profile</span>
+            </button>
+        </div>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content flex-grow ml-72 p-4 md:p-10">
+            
+            <!-- TOP BAR -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+                <div>
+                    <h1 class="text-3xl font-black tracking-tight mb-2">Welcome Back, <span id="user-greeting" class="text-primary">Operator</span></h1>
+                    <p class="text-gray-500 font-medium">Global Markets are <span class="text-primary font-bold">BULLISH</span> • Live Data Feed Active</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="relative group">
+                        <div class="absolute -inset-0.5 bg-gradient-to-r from-primary to-secondary rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
+                        <button onclick="openModal('deposit')" class="relative bg-surface px-6 py-3 rounded-xl flex items-center gap-3 font-bold border border-white/5">
+                            <i class="fas fa-plus-circle text-primary"></i> Quick Deposit
+                        </button>
+                    </div>
+                    <button onclick="handleLogout()" class="bg-danger/10 text-danger p-4 rounded-xl hover:bg-danger hover:text-white transition-all">
+                        <i class="fas fa-power-off"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- PAGE VIEWS -->
+
+            <!-- VIEW: HOME / DASHBOARD -->
+            <section id="view-home" class="page-view active">
+                <!-- QUICK STATS -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div class="glass-card p-8 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 transition-all">
+                            <i class="fas fa-wallet text-7xl"></i>
+                        </div>
+                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-[3px] mb-4">Total Assets Value</p>
+                        <h2 id="bal-total" class="text-4xl font-black font-mono tracking-tighter mb-4">₹0.00</h2>
+                        <div class="flex items-center gap-2 text-primary text-xs font-bold">
+                            <i class="fas fa-arrow-trend-up"></i> +12.4% vs Last Week
+                        </div>
+                    </div>
+                    <div class="glass-card p-8 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 transition-all">
+                            <i class="fas fa-chart-pie text-7xl"></i>
+                        </div>
+                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-[3px] mb-4">Active Investments</p>
+                        <h2 id="bal-invested" class="text-4xl font-black font-mono tracking-tighter mb-4 text-secondary">₹0.00</h2>
+                        <div class="flex items-center gap-2 text-gray-500 text-xs font-bold">
+                            <i class="fas fa-info-circle"></i> 4 Diversified Portfolios
+                        </div>
+                    </div>
+                    <div class="glass-card p-8 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 transition-all">
+                            <i class="fas fa-sack-dollar text-7xl"></i>
+                        </div>
+                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-[3px] mb-4">Institutional Profit</p>
+                        <h2 id="bal-profit" class="text-4xl font-black font-mono tracking-tighter mb-4">₹0.00</h2>
+                        <div class="flex items-center gap-2 text-primary text-xs font-bold">
+                            <i class="fas fa-circle-check"></i> Verified Real-time ROI
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FEATURED SECTION -->
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-2xl font-black tracking-tight"><i class="fas fa-star text-secondary mr-3"></i>Elite <span class="text-primary">Featured</span></h2>
+                    <button onclick="switchPage('invest')" class="text-primary font-bold text-sm hover:underline">Explore All Plans <i class="fas fa-arrow-right ml-2"></i></button>
+                </div>
+                <div id="featured-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                    <!-- Dynamic Featured Cards -->
+                </div>
+
+                <!-- RECENT ACTIVITY TABLE -->
+                <div class="glass-card p-8 rounded-2xl">
+                    <h3 class="text-xl font-black mb-8">Terminal Activity <span class="text-gray-600 text-sm ml-4">Latest 10 Events</span></h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="text-[10px] text-gray-500 uppercase tracking-widest border-b border-white/5">
+                                <tr>
+                                    <th class="pb-4">Timestamp</th>
+                                    <th class="pb-4">Operation</th>
+                                    <th class="pb-4">Amount</th>
+                                    <th class="pb-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="home-tx-list" class="text-sm">
+                                <!-- Dynamic Activity Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: MARKET -->
+            <section id="view-market" class="page-view">
+                <div class="glass-card p-10 rounded-2xl mb-10 border-primary/10 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-10 opacity-10">
+                        <i class="fas fa-globe text-[150px] text-primary"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <h1 class="text-5xl font-black tracking-tighter mb-4">Global <span class="text-primary">Crypto Bridge</span></h1>
+                        <p class="text-gray-400 max-w-2xl text-lg font-medium leading-relaxed">Access institutional-grade liquidity pools with 0.01s data latency. Trade over 1,000+ crypto assets directly from your terminal.</p>
+                        <div class="mt-8 flex items-center gap-8">
+                            <div class="flex items-center gap-3">
+                                <span class="w-3 h-3 bg-primary rounded-full animate-pulse"></span>
+                                <span class="font-mono text-sm font-bold tracking-widest uppercase">Live Terminal Sync</span>
+                            </div>
+                            <div class="font-mono text-gray-500 text-sm" id="market-timer">00:00:00 UTC</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-8">
+                    <!-- Market List -->
+                    <div class="flex-grow">
+                        <div class="glass-card rounded-2xl overflow-hidden">
+                            <div class="p-6 border-b border-white/5 flex items-center justify-between">
+                                <h3 class="font-black text-lg">Market Movers</h3>
+                                <div class="flex items-center gap-4">
+                                    <div class="relative">
+                                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                                        <input type="text" id="market-search" placeholder="Search Assets..." class="bg-black/40 border border-white/10 rounded-xl pl-12 pr-4 py-2 outline-none focus:border-primary text-sm w-64 transition-all">
+                                    </div>
+                                    <button class="bg-surface p-2 rounded-xl border border-white/10 hover:text-primary"><i class="fas fa-filter"></i></button>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left">
+                                    <thead class="text-[10px] text-gray-500 uppercase tracking-widest bg-black/20">
+                                        <tr>
+                                            <th class="p-6">Asset</th>
+                                            <th class="p-6">Current Price</th>
+                                            <th class="p-6">24h Volatility</th>
+                                            <th class="p-6">Market Cap</th>
+                                            <th class="p-6 text-right">Operation</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="market-list-body">
+                                        <!-- Dynamic 1000+ Coins Loaded Here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="market-load-more" class="p-8 text-center">
+                                <button onclick="loadMoreCoins()" class="text-primary font-bold hover:underline">Load Institutional Data Feed <i class="fas fa-arrow-down ml-2"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Market Sidebar -->
+                    <div class="w-full md:w-96 space-y-8">
+                        <div class="glass-card p-8 rounded-2xl">
+                            <h3 class="font-black text-lg mb-6 border-b border-white/5 pb-4"><i class="fas fa-newspaper text-primary mr-3"></i>Elite Intelligence</h3>
+                            <div id="market-news" class="space-y-6">
+                                <!-- Dynamic News -->
+                            </div>
+                        </div>
+                        <div class="glass-card p-8 rounded-2xl bg-gradient-to-br from-surface to-black border-secondary/20">
+                            <h3 class="font-black text-lg mb-6 text-secondary"><i class="fas fa-fire mr-3"></i>Hot Assets</h3>
+                            <div id="market-trending" class="space-y-4">
+                                <!-- Dynamic Trending -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: INVESTMENT PLANS -->
+            <section id="view-invest" class="page-view">
+                <div class="mb-12">
+                    <h1 class="text-4xl font-black tracking-tight mb-4">Elite <span class="text-primary">Investment Vault</span></h1>
+                    <p class="text-gray-500 text-lg">Managed portfolios designed for institutional-grade ROI. Diversify your capital across high-performance sectors.</p>
+                </div>
+
+                <div id="invest-plans-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                    <!-- Dynamic Investment Plans -->
+                </div>
+            </section>
+
+            <!-- VIEW: WALLET -->
+            <section id="view-wallet" class="page-view">
+                <div class="glass-card p-10 rounded-2xl mb-10 flex flex-col md:flex-row items-center justify-between gap-8 border-primary/10">
+                    <div class="flex items-center gap-8">
+                        <div class="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center">
+                            <i class="fas fa-wallet text-4xl text-primary"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Managed Asset Value</p>
+                            <h1 id="wallet-total-val" class="text-5xl font-black font-mono tracking-tighter">₹0.00</h1>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 w-full md:w-auto">
+                        <button onclick="openModal('deposit')" class="flex-grow bg-primary text-black font-black px-8 py-4 rounded-xl neo-glow">DEPOSIT</button>
+                        <button onclick="openModal('withdraw')" class="flex-grow bg-danger/10 text-danger border border-danger/20 font-black px-8 py-4 rounded-xl hover:bg-danger hover:text-white transition-all">WITHDRAW</button>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 mb-8">
+                    <button onclick="switchWalletTab('tx', this)" class="wallet-tab active px-8 py-4 rounded-xl bg-surface border border-white/5 font-bold text-gray-400 hover:text-white transition-all">Settlement History</button>
+                    <button onclick="switchWalletTab('holdings', this)" class="wallet-tab px-8 py-4 rounded-xl bg-surface border border-white/5 font-bold text-gray-400 hover:text-white transition-all">Asset Holdings</button>
+                    <button onclick="switchWalletTab('etf', this)" class="wallet-tab px-8 py-4 rounded-xl bg-surface border border-white/5 font-bold text-gray-400 hover:text-white transition-all">ETF Portfolios</button>
+                </div>
+
+                <div id="wallet-pane-tx" class="glass-card rounded-2xl overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="text-[10px] text-gray-500 uppercase tracking-widest bg-black/20">
+                            <tr>
+                                <th class="p-6">Date</th>
+                                <th class="p-6">Operation</th>
+                                <th class="p-6">Method</th>
+                                <th class="p-6">Amount</th>
+                                <th class="p-6 text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wallet-tx-body">
+                            <!-- Dynamic Transactions -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="wallet-pane-holdings" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Dynamic Holdings -->
+                </div>
+            </section>
+
+            <!-- VIEW: PROFILE -->
+            <section id="view-profile" class="page-view">
+                <div class="max-w-4xl mx-auto">
+                    <div class="glass-card p-12 rounded-2xl text-center mb-10 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent"></div>
+                        <div class="relative z-10">
+                            <div class="w-32 h-32 mx-auto relative mb-6 group">
+                                <img id="prof-pfp" src="https://via.placeholder.com/200" class="w-full h-full rounded-full border-4 border-primary object-cover shadow-2xl">
+                                <label for="pfp-upload" class="absolute bottom-0 right-0 bg-primary text-black w-10 h-10 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-all">
+                                    <i class="fas fa-camera"></i>
+                                </label>
+                                <input type="file" id="pfp-upload" class="hidden" onchange="handlePfpUpload(this)">
+                            </div>
+                            <h1 id="prof-name" class="text-4xl font-black mb-2">Operator Name</h1>
+                            <p id="prof-phone" class="text-gray-500 font-mono mb-6">+91 00000 00000</p>
+                            <div class="flex items-center justify-center gap-4">
+                                <span class="bg-secondary/10 text-secondary border border-secondary/20 px-4 py-2 rounded-full text-[10px] font-black tracking-widest uppercase">Elite Trader</span>
+                                <span class="bg-primary/10 text-primary border border-primary/20 px-4 py-2 rounded-full text-[10px] font-black tracking-widest uppercase">Verified Identity</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="glass-card p-8 rounded-2xl">
+                            <h3 class="text-xl font-black mb-8 border-b border-white/5 pb-4"><i class="fas fa-user-gear text-primary mr-3"></i>Terminal Settings</h3>
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Settlement UPI ID</label>
+                                    <input type="text" id="prof-upi" class="w-full bg-black/40 border border-white/10 rounded-xl px-5 py-4 focus:border-primary outline-none transition-all" placeholder="yourname@upi">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Crypto Wallet Address (BTC/ETH)</label>
+                                    <input type="text" id="prof-crypto" class="w-full bg-black/40 border border-white/10 rounded-xl px-5 py-4 focus:border-primary outline-none transition-all" placeholder="0x... or bc1...">
+                                </div>
+                                <button onclick="saveProfileSettings()" class="w-full bg-primary text-black font-black py-4 rounded-xl">UPDATE TERMINAL SETTINGS</button>
+                            </div>
+                        </div>
+                        <div class="glass-card p-8 rounded-2xl">
+                            <h3 class="text-xl font-black mb-8 border-b border-white/5 pb-4"><i class="fas fa-shield-halved text-primary mr-3"></i>Security Protocol</h3>
+                            <div class="space-y-6">
+                                <div class="flex items-center justify-between p-4 bg-black/40 rounded-xl">
+                                    <div>
+                                        <h4 class="font-bold text-sm">2-Factor Authentication</h4>
+                                        <p class="text-[10px] text-gray-500">Enhanced security for withdrawals</p>
+                                    </div>
+                                    <div class="w-12 h-6 bg-primary rounded-full relative"><div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div></div>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-black/40 rounded-xl">
+                                    <div>
+                                        <h4 class="font-bold text-sm">Session Monitoring</h4>
+                                        <p class="text-[10px] text-gray-500">Real-time terminal access logs</p>
+                                    </div>
+                                    <div class="w-12 h-6 bg-primary rounded-full relative"><div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div></div>
+                                </div>
+                                <div class="p-6 bg-danger/5 border border-danger/10 rounded-xl">
+                                    <p class="text-[10px] text-danger font-black uppercase tracking-widest mb-2">Emergency Action</p>
+                                    <button class="text-danger font-bold text-sm hover:underline">Freeze All Terminal Assets</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: ADMIN COMMAND CENTER -->
+            <section id="view-admin" class="page-view">
+                <!-- LOCK SCREEN -->
+                <div id="admin-lock" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div class="text-center max-w-md w-full">
+                        <div class="w-24 h-24 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-8 border-2 border-secondary/20">
+                            <i class="fas fa-lock text-4xl text-secondary"></i>
+                        </div>
+                        <h2 class="text-3xl font-black mb-4">Authorization Required</h2>
+                        <p class="text-gray-500 mb-10">Accessing institutional command modules requires a valid Root Key.</p>
+                        <div class="space-y-4">
+                            <input type="password" id="admin-key" class="w-full bg-surface border border-white/10 rounded-xl px-6 py-4 focus:border-secondary outline-none text-center text-xl tracking-[10px]" placeholder="••••••••">
+                            <button onclick="unlockAdmin()" class="w-full bg-secondary text-black font-black py-4 rounded-xl gold-glow">AUTHORIZE ACCESS</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADMIN INTERFACE -->
+                <div id="admin-hub" class="hidden space-y-10">
+                    <div class="flex items-center justify-between">
+                        <h1 class="text-4xl font-black tracking-tight text-secondary"><i class="fas fa-terminal mr-4"></i>Command Hub <span class="text-white">v4.2.0</span></h1>
+                        <div class="bg-secondary/10 text-secondary border border-secondary/20 px-6 py-2 rounded-full font-mono text-xs font-bold tracking-widest">ROOT ACCESS GRANTED</div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="glass-card p-6 rounded-2xl border-secondary/10">
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Total Managed Users</p>
+                            <h2 id="adm-stat-users" class="text-3xl font-black font-mono">0</h2>
+                        </div>
+                        <div class="glass-card p-6 rounded-2xl border-secondary/10">
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Total System Deposits</p>
+                            <h2 id="adm-stat-dep" class="text-3xl font-black font-mono text-primary">₹0</h2>
+                        </div>
+                        <div class="glass-card p-6 rounded-2xl border-secondary/10">
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Pending Liquidations</p>
+                            <h2 id="adm-stat-pend" class="text-3xl font-black font-mono text-danger">0</h2>
+                        </div>
+                        <div class="glass-card p-6 rounded-2xl border-secondary/10">
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Network Health</p>
+                            <h2 class="text-3xl font-black font-mono text-primary">OPTIMAL</h2>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                        <!-- Site Control -->
+                        <div class="lg:col-span-1 space-y-8">
+                            <div class="glass-card p-8 rounded-2xl border-secondary/10">
+                                <h3 class="font-black text-lg mb-8 border-b border-white/5 pb-4">Global Parameters</h3>
+                                <div class="space-y-6">
+                                    <div>
+                                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Terminal Title</label>
+                                        <input type="text" id="adm-site-name" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 focus:border-secondary outline-none text-sm">
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Primary Color</label>
+                                            <input type="color" id="adm-color-p" class="w-full h-12 bg-black/40 border border-white/10 rounded-xl p-1">
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Secondary Color</label>
+                                            <input type="color" id="adm-color-s" class="w-full h-12 bg-black/40 border border-white/10 rounded-xl p-1">
+                                        </div>
+                                    </div>
+                                    <button onclick="saveAdminGlobal()" class="w-full bg-secondary text-black font-black py-4 rounded-xl">UPDATE TERMINAL</button>
+                                </div>
+                            </div>
+
+                            <div class="glass-card p-8 rounded-2xl border-secondary/10">
+                                <h3 class="font-black text-lg mb-8 border-b border-white/5 pb-4">Settlement Config</h3>
+                                <div class="space-y-6">
+                                    <div>
+                                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Elite UPI ID</label>
+                                        <input type="text" id="adm-upi" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 focus:border-secondary outline-none text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">BTC Address</label>
+                                        <input type="text" id="adm-btc" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 focus:border-secondary outline-none text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">ETH Address</label>
+                                        <input type="text" id="adm-eth" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 focus:border-secondary outline-none text-sm">
+                                    </div>
+                                    <button onclick="saveAdminFinance()" class="w-full bg-secondary text-black font-black py-4 rounded-xl">SAVE SETTLEMENTS</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Content & Transactions -->
+                        <div class="lg:col-span-2 space-y-8">
+                            <div class="glass-card p-8 rounded-2xl border-secondary/10">
+                                <h3 class="font-black text-lg mb-8 border-b border-white/5 pb-4">Deploy New Asset/Plan</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    <div>
+                                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Type</label>
+                                        <select id="adm-type" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 focus:border-secondary outline-none text-sm">
+                                            <option value="featured">Featured Banner</option>
+                                            <option value="plan">Investment Plan</option>
+                                            <option value="news">Market Intelligence</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Title</label>
+                                        <input type="text" id="adm-title" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 focus:border-secondary outline-none text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Min Stake (₹)</label>
+                                        <input type="number" id="adm-min" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 focus:border-secondary outline-none text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">ROI (%)</label>
+                                        <input type="number" id="adm-roi" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 focus:border-secondary outline-none text-sm">
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Description</label>
+                                        <textarea id="adm-desc" rows="3" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 focus:border-secondary outline-none text-sm"></textarea>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Visual Asset (Image URL)</label>
+                                        <input type="text" id="adm-img" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 focus:border-secondary outline-none text-sm">
+                                    </div>
+                                </div>
+                                <button onclick="deployAsset()" class="w-full bg-secondary text-black font-black py-4 rounded-xl">LAUNCH TO TERMINAL</button>
+                            </div>
+
+                            <div class="glass-card p-8 rounded-2xl border-secondary/10">
+                                <h3 class="font-black text-lg mb-8 border-b border-white/5 pb-4">Pending Settlement Queue</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left">
+                                        <thead class="text-[10px] text-gray-500 uppercase tracking-widest bg-black/20">
+                                            <tr>
+                                                <th class="p-4">Operator</th>
+                                                <th class="p-4">Type</th>
+                                                <th class="p-4">Amount</th>
+                                                <th class="p-4">Reference</th>
+                                                <th class="p-4 text-right">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="adm-tx-list" class="text-sm">
+                                            <!-- Pending Transactions -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL SYSTEM -->
+    
+    <!-- Modal: Deposit -->
+    <div id="modal-deposit" class="fixed inset-0 z-[1000] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 hidden">
+        <div class="glass-card w-full max-w-lg p-10 rounded-2xl border-primary/20 relative">
+            <button onclick="closeModal('deposit')" class="absolute top-6 right-6 text-gray-500 hover:text-danger text-2xl">&times;</button>
+            <h2 class="text-3xl font-black mb-2">Initialize <span class="text-primary">Deposit</span></h2>
+            <p class="text-gray-500 text-sm mb-8">Choose settlement method and amount.</p>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Deposit Amount (₹)</label>
+                    <input type="number" id="dep-amt" class="w-full bg-black/40 border border-white/10 rounded-xl px-6 py-4 focus:border-primary outline-none text-2xl font-mono" placeholder="Min ₹500">
+                    <div class="flex gap-2 mt-4">
+                        <button onclick="setDep(1000)" class="flex-grow bg-white/5 py-2 rounded-lg text-xs font-bold hover:bg-primary hover:text-black transition-all">₹1,000</button>
+                        <button onclick="setDep(5000)" class="flex-grow bg-white/5 py-2 rounded-lg text-xs font-bold hover:bg-primary hover:text-black transition-all">₹5,000</button>
+                        <button onclick="setDep(10000)" class="flex-grow bg-white/5 py-2 rounded-lg text-xs font-bold hover:bg-primary hover:text-black transition-all">₹10,000</button>
+                        <button onclick="setDep(50000)" class="flex-grow bg-white/5 py-2 rounded-lg text-xs font-bold hover:bg-primary hover:text-black transition-all">₹50,000</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="switchPay('upi')" id="pay-btn-upi" class="pay-tab active p-6 rounded-xl bg-surface border-2 border-primary/20 text-center group">
+                        <i class="fas fa-mobile-screen text-2xl mb-2 text-primary group-hover:scale-110 transition-all"></i>
+                        <p class="text-xs font-bold">UPI Settlement</p>
+                    </button>
+                    <button onclick="switchPay('crypto')" id="pay-btn-crypto" class="pay-tab p-6 rounded-xl bg-surface border-2 border-white/5 text-center group">
+                        <i class="fab fa-bitcoin text-2xl mb-2 text-gray-500 group-hover:text-primary transition-all"></i>
+                        <p class="text-xs font-bold">Crypto Bridge</p>
+                    </button>
+                </div>
+
+                <div id="pane-upi" class="p-6 bg-black/40 rounded-xl border border-dashed border-primary/30 text-center">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Elite UPI Identity</p>
+                    <h3 id="disp-adm-upi" class="text-xl font-mono font-bold text-primary mb-6">loading...</h3>
+                    <div class="w-48 h-48 bg-white mx-auto rounded-xl flex items-center justify-center text-black font-black mb-6">QR CODE</div>
+                    <a href="#" id="upi-link" class="block w-full bg-primary text-black font-black py-4 rounded-xl">OPEN UPI APP</a>
+                </div>
+
+                <div id="pane-crypto" class="hidden p-6 bg-black/40 rounded-xl border border-dashed border-primary/30">
+                    <div class="mb-4">
+                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">BTC Bridge Address</p>
+                        <p id="disp-adm-btc" class="text-xs font-mono text-secondary break-all">loading...</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">ETH Bridge Address</p>
+                        <p id="disp-adm-eth" class="text-xs font-mono text-secondary break-all">loading...</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Reference (UTR / Hash)</label>
+                    <input type="text" id="dep-ref" class="w-full bg-black/40 border border-white/10 rounded-xl px-6 py-4 focus:border-primary outline-none" placeholder="Enter Reference ID">
+                </div>
+
+                <button onclick="submitDeposit()" class="w-full bg-primary text-black font-black py-5 rounded-xl neo-glow">SUBMIT SETTLEMENT</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Withdraw -->
+    <div id="modal-withdraw" class="fixed inset-0 z-[1000] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 hidden">
+        <div class="glass-card w-full max-w-lg p-10 rounded-2xl border-danger/20 relative">
+            <button onclick="closeModal('withdraw')" class="absolute top-6 right-6 text-gray-500 hover:text-danger text-2xl">&times;</button>
+            <h2 class="text-3xl font-black mb-2">Asset <span class="text-danger">Liquidation</span></h2>
+            <p class="text-gray-500 text-sm mb-8">Request withdrawal to verified destination.</p>
+            
+            <div class="space-y-8">
+                <div class="p-6 bg-black/40 rounded-xl">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Withdrawable Balance</p>
+                    <h2 id="wd-max" class="text-4xl font-black font-mono tracking-tighter">₹0.00</h2>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Liquidation Amount (₹)</label>
+                    <input type="number" id="wd-amt" class="w-full bg-black/40 border border-white/10 rounded-xl px-6 py-4 focus:border-danger outline-none text-2xl font-mono" placeholder="Enter Amount">
+                </div>
+
+                <div class="p-6 bg-surface border border-white/5 rounded-xl">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Destination Identity</p>
+                    <h4 id="wd-dest" class="font-bold text-primary">Not Configured</h4>
+                    <p class="text-[10px] text-gray-500 mt-2">Update destination in Terminal Settings.</p>
+                </div>
+
+                <button onclick="submitWithdraw()" class="w-full bg-danger text-white font-black py-5 rounded-xl shadow-[0_0_20px_rgba(255,68,68,0.2)]">INITIALIZE LIQUIDATION</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Crypto Detail -->
+    <div id="modal-crypto" class="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4 hidden">
+        <div class="glass-card w-full max-w-4xl p-10 rounded-2xl border-primary/20 relative overflow-y-auto max-h-[95vh]">
+            <button onclick="closeModal('crypto')" class="absolute top-6 right-6 text-gray-500 hover:text-danger text-2xl">&times;</button>
+            
+            <div class="flex items-center gap-6 mb-10">
+                <img id="cm-icon" src="" class="w-20 h-20 rounded-full border-2 border-primary/20">
+                <div>
+                    <h2 id="cm-name" class="text-4xl font-black tracking-tight">Bitcoin</h2>
+                    <p id="cm-sym" class="text-gray-500 font-mono text-xl uppercase">BTC</p>
+                </div>
+                <div class="ml-auto text-right">
+                    <h2 id="cm-price" class="text-4xl font-black font-mono tracking-tighter">$0.00</h2>
+                    <p id="cm-change" class="text-primary font-bold text-lg">+0.00%</p>
+                </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="bg-black/40 rounded-2xl p-6 border border-white/5 mb-10 h-80">
+                <canvas id="cm-chart"></canvas>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-6">
+                    <h3 class="font-black text-xl border-b border-white/5 pb-4">Asset Statistics</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 bg-white/5 rounded-xl">
+                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Market Cap</p>
+                            <p id="cm-cap" class="font-mono font-bold text-sm">$0.00</p>
+                        </div>
+                        <div class="p-4 bg-white/5 rounded-xl">
+                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">24h Volume</p>
+                            <p id="cm-vol" class="font-mono font-bold text-sm">$0.00</p>
+                        </div>
+                        <div class="p-4 bg-white/5 rounded-xl">
+                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">High 24h</p>
+                            <p id="cm-high" class="font-mono font-bold text-sm text-primary">$0.00</p>
+                        </div>
+                        <div class="p-4 bg-white/5 rounded-xl">
+                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Low 24h</p>
+                            <p id="cm-low" class="font-mono font-bold text-sm text-danger">$0.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <h3 class="font-black text-xl border-b border-white/5 pb-4">Execute Order</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Acquisition Method</label>
+                            <select id="cm-buy-type" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 focus:border-primary outline-none text-sm">
+                                <option value="direct">Direct Institutional Acquisition</option>
+                                <option value="etf">ETF-Backed Synthetic Bridge</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Investment Amount (USD)</label>
+                            <input type="number" id="cm-buy-amt" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 focus:border-primary outline-none text-xl font-mono" placeholder="$10.00">
+                        </div>
+                        <button onclick="executeOrder()" class="w-full bg-primary text-black font-black py-4 rounded-xl neo-glow">EXECUTE MARKET ORDER</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CORE ENGINE SCRIPT -->
+    <script>
+        /**
+         * SQL ELITE TERMINAL v4.2.0
+         * Institutional Grade Investment Engine
+         */
+
+        // 1. CONFIGURATION & INITIALIZATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyBvObxADcAior6R_or9O6UmWsFT8do1GkI",
+            authDomain: "sqladmin-ff04d.firebaseapp.com",
+            projectId: "sqladmin-ff04d",
+            storageBucket: "sqladmin-ff04d.firebasestorage.app",
+            messagingSenderId: "539086978850",
+            appId: "1:539086978850:web:261e6a0cf3c9a2aa29ef7b"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Application State
+        const State = {
+            user: null,
+            userData: null,
+            admin: {},
+            market: [],
+            currentPage: 0,
+            coinsPerPage: 50,
+            selectedCoin: null,
+            chart: null,
+            payMethod: 'upi'
+        };
+
+        // 2. AUTHENTICATION MODULE
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                State.user = user;
+                await initializeTerminal();
+            } else {
+                showView('auth');
+                hideLoader();
+            }
+        });
+
+        function toggleAuth(pane) {
+            document.getElementById('login-pane').classList.toggle('hidden', pane !== 'login');
+            document.getElementById('reg-pane').classList.toggle('hidden', pane !== 'reg');
+        }
+
+        async function handleAuth(type) {
+            showLoader();
+            try {
+                if (type === 'register') {
+                    const name = document.getElementById('reg-name').value;
+                    const phone = document.getElementById('reg-phone').value;
+                    const pass = document.getElementById('reg-pass').value;
+                    const confirm = document.getElementById('reg-confirm').value;
+
+                    if (!name || !phone || pass !== confirm) throw new Error("Validation Failed.");
+                    
+                    const email = `${phone.replace(/\s+/g, '')}@sql-elite.com`;
+                    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+                    
+                    const refCode = 'SQL' + Math.random().toString(36).substr(2, 6).toUpperCase();
+                    const referredBy = new URLSearchParams(window.location.search).get('ref') || '';
+
+                    await db.collection('users').doc(cred.user.uid).set({
+                        uid: cred.user.uid,
+                        name, phone, email,
+                        balance: 0, profit: 0, loss: 0, totalInvested: 0,
+                        referralCode: refCode, referredBy,
+                        refCount: 0, refEarned: 0,
+                        upi: '', crypto: '', pfp: '',
+                        role: 'operator',
+                        joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } else {
+                    const phone = document.getElementById('login-phone').value;
+                    const pass = document.getElementById('login-pass').value;
+                    const email = `${phone.replace(/\s+/g, '')}@sql-elite.com`;
+                    await auth.signInWithEmailAndPassword(email, pass);
+                }
+            } catch (e) {
+                alert(e.message);
+            } finally {
+                hideLoader();
+            }
+        }
+
+        function handleLogout() {
+            auth.signOut().then(() => location.reload());
+        }
+
+        // 3. TERMINAL INITIALIZATION
+        async function initializeTerminal() {
+            // Sync User Data
+            db.collection('users').doc(State.user.uid).onSnapshot(doc => {
+                if (doc.exists) {
+                    State.userData = doc.data();
+                    updateUserUI();
+                }
+            });
+
+            // Sync Admin Config
+            db.collection('admin').doc('config').onSnapshot(doc => {
+                if (doc.exists) {
+                    State.admin = doc.data();
+                    updateAdminUI();
+                }
+            });
+
+            // Initialize Market Data
+            await fetchMarketData();
+            setInterval(fetchMarketData, 30000); // Institutional Refresh Rate
+            
+            // Load Dynamic Content
+            loadTerminalContent();
+            
+            // Show Shell
+            showView('app');
+            hideLoader();
+        }
+
+        function updateUserUI() {
+            const d = State.userData;
+            document.getElementById('user-greeting').innerText = d.name;
+            document.getElementById('user-name-side').innerText = d.name;
+            document.getElementById('prof-name').innerText = d.name;
+            document.getElementById('prof-phone').innerText = d.phone;
+            
+            if (d.pfp) {
+                document.getElementById('user-pfp-side').src = d.pfp;
+                document.getElementById('prof-pfp').src = d.pfp;
+            }
+
+            const format = (v) => '₹' + (v || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+            document.getElementById('bal-total').innerText = format(d.balance + d.totalInvested);
+            document.getElementById('bal-invested').innerText = format(d.totalInvested);
+            document.getElementById('bal-profit').innerText = format(d.profit);
+            document.getElementById('wallet-total-val').innerText = format(d.balance + d.totalInvested);
+            document.getElementById('wd-max').innerText = format(d.balance);
+
+            document.getElementById('prof-upi').value = d.upi || '';
+            document.getElementById('prof-crypto').value = d.crypto || '';
+            document.getElementById('wd-dest').innerText = d.upi || d.crypto || 'Not Configured';
+
+            loadUserTransactions();
+        }
+
+        function updateAdminUI() {
+            const a = State.admin;
+            if (a.siteName) {
+                document.querySelectorAll('.sidebar-header h3').forEach(h => h.innerHTML = a.siteName.replace('Elite', '<span class="text-primary">Elite</span>'));
+                document.title = a.siteName + " | Elite Terminal";
+            }
+            if (a.pColor) document.documentElement.style.setProperty('--primary', a.pColor);
+            if (a.sColor) document.documentElement.style.setProperty('--secondary', a.sColor);
+
+            document.getElementById('disp-adm-upi').innerText = a.upi || 'OFFLINE';
+            document.getElementById('disp-adm-btc').innerText = a.btc || 'OFFLINE';
+            document.getElementById('disp-adm-eth').innerText = a.eth || 'OFFLINE';
+            document.getElementById('upi-link').href = `upi://pay?pa=${a.upi}&pn=SQL%20ELITE&cu=INR`;
+        }
+
+        // 4. MARKET ENGINE (COINGECKO 1000+ COINS)
+        async function fetchMarketData() {
+            try {
+                // Fetch top 250 coins (standard limit for free tier)
+                const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&sparkline=true&price_change_percentage=24h');
+                State.market = await res.json();
+                renderMarketTable();
+                updateTrending();
+                updateNews();
+            } catch (e) {
+                console.error("Market Feed Interrupted.");
+            }
+        }
+
+        function renderMarketTable() {
+            const tbody = document.getElementById('market-list-body');
+            const search = document.getElementById('market-search').value.toLowerCase();
+            tbody.innerHTML = '';
+
+            const filtered = State.market.filter(c => c.name.toLowerCase().includes(search) || c.symbol.toLowerCase().includes(search));
+            
+            filtered.slice(0, (State.currentPage + 1) * State.coinsPerPage).forEach(coin => {
+                const tr = document.createElement('tr');
+                tr.className = 'market-row cursor-pointer';
+                tr.onclick = () => openCryptoDetail(coin);
+                
+                const change = coin.price_change_percentage_24h || 0;
+                
+                tr.innerHTML = `
+                    <td class="p-6">
+                        <div class="flex items-center gap-4">
+                            <img src="${coin.image}" class="w-8 h-8 rounded-full">
+                            <div>
+                                <p class="font-bold text-sm">${coin.name}</p>
+                                <p class="text-[10px] text-gray-500 font-mono uppercase">${coin.symbol}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-6 font-mono font-bold text-sm">$${coin.current_price.toLocaleString()}</td>
+                    <td class="p-6">
+                        <span class="px-3 py-1 rounded-lg text-[10px] font-black ${change >= 0 ? 'bg-primary/10 text-primary' : 'bg-danger/10 text-danger'}">
+                            ${change >= 0 ? '+' : ''}${change.toFixed(2)}%
+                        </span>
+                    </td>
+                    <td class="p-6 text-gray-500 font-mono text-xs">$${(coin.market_cap / 1e9).toFixed(2)}B</td>
+                    <td class="p-6 text-right">
+                        <button class="bg-primary/10 text-primary border border-primary/20 px-4 py-2 rounded-xl text-[10px] font-black hover:bg-primary hover:text-black transition-all">TRADE</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function loadMoreCoins() {
+            State.currentPage++;
+            renderMarketTable();
+        }
+
+        document.getElementById('market-search').oninput = renderMarketTable;
+
+        function openCryptoDetail(coin) {
+            State.selectedCoin = coin;
+            document.getElementById('cm-icon').src = coin.image;
+            document.getElementById('cm-name').innerText = coin.name;
+            document.getElementById('cm-sym').innerText = coin.symbol.toUpperCase();
+            document.getElementById('cm-price').innerText = '$' + coin.current_price.toLocaleString();
+            
+            const change = coin.price_change_percentage_24h || 0;
+            const el = document.getElementById('cm-change');
+            el.innerText = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
+            el.className = change >= 0 ? 'text-primary font-bold text-lg' : 'text-danger font-bold text-lg';
+
+            document.getElementById('cm-cap').innerText = '$' + (coin.market_cap / 1e9).toFixed(2) + 'B';
+            document.getElementById('cm-vol').innerText = '$' + (coin.total_volume / 1e6).toFixed(2) + 'M';
+            document.getElementById('cm-high').innerText = '$' + coin.high_24h.toLocaleString();
+            document.getElementById('cm-low').innerText = '$' + coin.low_24h.toLocaleString();
+
+            openModal('crypto');
+            renderChart(coin);
+        }
+
+        function renderChart(coin) {
+            const ctx = document.getElementById('cm-chart').getContext('2d');
+            if (State.chart) State.chart.destroy();
+
+            const spark = coin.sparkline_in_7d.price;
+            const labels = spark.map((_, i) => i);
+
+            State.chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: spark,
+                        borderColor: '#00ff88',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.4,
+                        fill: true,
+                        backgroundColor: (context) => {
+                            const chart = context.chart;
+                            const {ctx, chartArea} = chart;
+                            if (!chartArea) return null;
+                            const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                            gradient.addColorStop(0, 'rgba(0, 255, 136, 0)');
+                            gradient.addColorStop(1, 'rgba(0, 255, 136, 0.1)');
+                            return gradient;
+                        }
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    }
+                }
+            });
+        }
+
+        function updateTrending() {
+            const container = document.getElementById('market-trending');
+            container.innerHTML = '';
+            State.market.slice(0, 5).forEach(coin => {
+                container.innerHTML += `
+                    <div class="flex items-center justify-between p-3 bg-black/20 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <img src="${coin.image}" class="w-6 h-6 rounded-full">
+                            <span class="font-bold text-sm">${coin.symbol.toUpperCase()}</span>
+                        </div>
+                        <span class="text-primary font-mono text-xs font-bold">$${coin.current_price.toLocaleString()}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function updateNews() {
+            const container = document.getElementById('market-news');
+            const mockNews = [
+                { title: "Bitcoin Institutional Inflow Hits Record High", time: "2m ago" },
+                { title: "Ethereum Layer-2 Adoption Surges 400%", time: "15m ago" },
+                { title: "SQL Elite Terminal Expands Liquidity Bridge", time: "1h ago" }
+            ];
+            container.innerHTML = '';
+            mockNews.forEach(n => {
+                container.innerHTML += `
+                    <div class="border-l-2 border-primary/20 pl-4">
+                        <h4 class="font-bold text-sm mb-1">${n.title}</h4>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">${n.time}</p>
+                    </div>
+                `;
+            });
+        }
+
+        // 5. FINANCIAL & CONTENT LOGIC
+        async function loadTerminalContent() {
+            db.collection('content').orderBy('timestamp', 'desc').onSnapshot(snap => {
+                const featGrid = document.getElementById('featured-grid');
+                const planGrid = document.getElementById('invest-plans-grid');
+                featGrid.innerHTML = ''; planGrid.innerHTML = '';
+
+                snap.forEach(doc => {
+                    const c = doc.data();
+                    const card = createPlanCard(c, doc.id);
+                    if (c.type === 'featured') featGrid.appendChild(card);
+                    if (c.type === 'plan') planGrid.appendChild(card);
+                });
+            });
+        }
+
+        function createPlanCard(c, id) {
+            const div = document.createElement('div');
+            div.className = 'glass-card rounded-2xl overflow-hidden group hover:border-primary/30 transition-all';
+            div.innerHTML = `
+                <div class="h-48 overflow-hidden relative">
+                    <img src="${c.img || 'https://via.placeholder.com/600x400'}" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-700">
+                    <div class="absolute top-4 left-4 bg-primary text-black px-4 py-1 rounded-full text-[10px] font-black tracking-widest uppercase">${c.roi}% ROI</div>
+                </div>
+                <div class="p-8">
+                    <h3 class="text-xl font-black mb-4">${c.title}</h3>
+                    <p class="text-gray-500 text-sm mb-8 leading-relaxed">${c.desc}</p>
+                    <div class="grid grid-cols-2 gap-4 mb-8 bg-black/20 p-4 rounded-xl">
+                        <div><p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Min Stake</p><p class="font-mono font-bold text-primary">₹${c.min}</p></div>
+                        <div><p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Duration</p><p class="font-mono font-bold text-primary">30 Days</p></div>
+                    </div>
+                    <button onclick="openModal('deposit', ${c.min})" class="w-full bg-white/5 border border-primary/20 text-primary font-black py-4 rounded-xl hover:bg-primary hover:text-black transition-all">INVEST NOW</button>
+                </div>
+            `;
+            return div;
+        }
+
+        async function submitDeposit() {
+            const amt = parseFloat(document.getElementById('dep-amt').value);
+            const ref = document.getElementById('dep-ref').value;
+            if (!amt || !ref) return alert("All fields required.");
+
+            try {
+                showLoader();
+                await db.collection('transactions').add({
+                    uid: State.user.uid,
+                    userName: State.userData.name,
+                    amount: amt,
+                    ref, type: 'deposit',
+                    method: State.payMethod,
+                    status: 'pending',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert("Deposit Logged. Verifying...");
+                closeModal('deposit');
+            } catch (e) { alert(e.message); }
+            finally { hideLoader(); }
+        }
+
+        async function submitWithdraw() {
+            const amt = parseFloat(document.getElementById('wd-amt').value);
+            if (!amt || amt > State.userData.balance) return alert("Invalid amount.");
+
+            try {
+                showLoader();
+                await db.collection('transactions').add({
+                    uid: State.user.uid,
+                    userName: State.userData.name,
+                    amount: amt,
+                    type: 'withdrawal',
+                    dest: State.userData.upi || State.userData.crypto,
+                    status: 'pending',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert("Liquidation Requested.");
+                closeModal('withdraw');
+            } catch (e) { alert(e.message); }
+            finally { hideLoader(); }
+        }
+
+        function loadUserTransactions() {
+            db.collection('transactions').where('uid', '==', State.user.uid).orderBy('timestamp', 'desc').limit(10).onSnapshot(snap => {
+                const homeList = document.getElementById('home-tx-list');
+                const walletList = document.getElementById('wallet-tx-body');
+                homeList.innerHTML = ''; walletList.innerHTML = '';
+
+                snap.forEach(doc => {
+                    const tx = doc.data();
+                    const date = tx.timestamp ? tx.timestamp.toDate().toLocaleDateString() : '...';
+                    const row = `
+                        <tr class="border-b border-white/5">
+                            <td class="py-4 font-mono text-xs text-gray-500">${date}</td>
+                            <td class="py-4 font-bold uppercase text-xs">${tx.type}</td>
+                            <td class="py-4 font-mono font-bold ${tx.type === 'deposit' ? 'text-primary' : 'text-danger'}">₹${tx.amount.toLocaleString()}</td>
+                            <td class="py-4 text-right"><span class="px-3 py-1 rounded-lg text-[10px] font-black bg-white/5 text-secondary">${tx.status.toUpperCase()}</span></td>
+                        </tr>
+                    `;
+                    homeList.innerHTML += row;
+                    walletList.innerHTML += row;
+                });
+            });
+        }
+
+        // 6. ADMIN MODULE
+        function unlockAdmin() {
+            const key = document.getElementById('admin-key').value;
+            if (key === 'SQL-ROOT-2026') {
+                document.getElementById('admin-lock').classList.add('hidden');
+                document.getElementById('admin-hub').classList.remove('hidden');
+                initializeAdminHub();
+            } else {
+                alert("Access Denied.");
+            }
+        }
+
+        function initializeAdminHub() {
+            const a = State.admin;
+            document.getElementById('adm-site-name').value = a.siteName || '';
+            document.getElementById('adm-upi').value = a.upi || '';
+            document.getElementById('adm-btc').value = a.btc || '';
+            document.getElementById('adm-eth').value = a.eth || '';
+            
+            // Stats
+            db.collection('users').get().then(s => document.getElementById('adm-stat-users').innerText = s.size);
+            db.collection('transactions').where('type', '==', 'deposit').where('status', '==', 'approved').get().then(s => {
+                let total = 0; s.forEach(d => total += d.data().amount);
+                document.getElementById('adm-stat-dep').innerText = '₹' + total.toLocaleString();
+            });
+            db.collection('transactions').where('status', '==', 'pending').onSnapshot(snap => {
+                document.getElementById('adm-stat-pend').innerText = snap.size;
+                const list = document.getElementById('adm-tx-list');
+                list.innerHTML = '';
+                snap.forEach(doc => {
+                    const tx = doc.data();
+                    list.innerHTML += `
+                        <tr class="border-b border-white/5">
+                            <td class="p-4">${tx.userName}</td>
+                            <td class="p-4 uppercase font-bold text-xs">${tx.type}</td>
+                            <td class="p-4 font-mono font-bold">₹${tx.amount}</td>
+                            <td class="p-4 text-[10px] text-gray-500">${tx.ref || 'Dest'}</td>
+                            <td class="p-4 text-right">
+                                <button onclick="processTx('${doc.id}', 'approve')" class="text-primary font-black mr-4">Approve</button>
+                                <button onclick="processTx('${doc.id}', 'reject')" class="text-danger font-black">Reject</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        async function processTx(id, action) {
+            try {
+                showLoader();
+                const doc = await db.collection('transactions').doc(id).get();
+                const tx = doc.data();
+                if (action === 'approve') {
+                    const uRef = db.collection('users').doc(tx.uid);
+                    if (tx.type === 'deposit') {
+                        await uRef.update({ 
+                            balance: firebase.firestore.FieldValue.increment(tx.amount),
+                            totalInvested: firebase.firestore.FieldValue.increment(tx.amount)
+                        });
+                    } else {
+                        await uRef.update({ balance: firebase.firestore.FieldValue.increment(-tx.amount) });
+                    }
+                    await db.collection('transactions').doc(id).update({ status: 'approved' });
+                } else {
+                    await db.collection('transactions').doc(id).update({ status: 'rejected' });
+                }
+            } catch (e) { alert(e.message); }
+            finally { hideLoader(); }
+        }
+
+        // 7. UTILITY FUNCTIONS
+        function switchPage(pageId, el) {
+            document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+            document.getElementById('view-' + pageId).classList.add('active');
+            if (el) {
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                el.classList.add('active');
+            }
+            window.scrollTo(0, 0);
+        }
+
+        function openModal(id, val) {
+            if (val) document.getElementById('dep-amt').value = val;
+            document.getElementById('modal-' + id).classList.remove('hidden');
+        }
+
+        function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); }
+
+        function showLoader() { document.getElementById('master-loader').classList.remove('hidden'); }
+        function hideLoader() { document.getElementById('master-loader').classList.add('hidden'); }
+
+        function showView(v) {
+            document.getElementById('auth-view').classList.toggle('hidden', v !== 'auth');
+            document.getElementById('app-shell').classList.toggle('hidden', v !== 'app');
+        }
+
+        function setDep(v) { document.getElementById('dep-amt').value = v; }
+
+        function switchPay(opt) {
+            State.payMethod = opt;
+            document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('active', 'border-primary/20'));
+            document.getElementById('pay-btn-' + opt).classList.add('active', 'border-primary/20');
+            document.getElementById('pane-upi').classList.toggle('hidden', opt !== 'upi');
+            document.getElementById('pane-crypto').classList.toggle('hidden', opt !== 'crypto');
+        }
+
+        // Clock Update
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('market-timer').innerText = now.toISOString().split('T')[1].split('.')[0] + " UTC";
+        }, 1000);
+
+    </script>
+</body>
+</html>
