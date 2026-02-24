@@ -157,6 +157,15 @@
             .text-6xl { font-size: 3rem !important; }
             .p-12 { padding: 1.5rem !important; }
             .p-10 { padding: 1.25rem !important; }
+            .market-row td { padding: 12px 8px !important; font-size: 13px !important; }
+            table thead th { font-size: 10px !important; padding: 12px 8px !important; }
+        }
+
+        @media (max-width: 768px) {
+            .main-content { padding: 0.75rem !important; padding-bottom: 110px !important; }
+            .glass-card { border-radius: 20px; }
+            .mobile-nav-btn { min-height: 48px; }
+            .market-list-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         }
 
         /* Profile Image Upload Overlay */
@@ -194,6 +203,33 @@
             background: var(--primary) !important;
             color: black !important;
             border-color: var(--primary) !important;
+        }
+
+        /* Market Skeleton Loader */
+        .skeleton {
+            background: linear-gradient(90deg, #222 25%, #333 50%, #222 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Fixed Button Polish */
+        button {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        button:active {
+            transform: scale(0.96);
+        }
+
+        /* Perfect Mobile Market Table */
+        .market-table {
+            min-width: 100%;
+        }
+        @media (max-width: 640px) {
+            .market-table td:first-child { min-width: 180px; }
         }
     </style>
 </head>
@@ -461,8 +497,8 @@
                                     <button class="bg-surface p-4 rounded-2xl border border-white/10 hover:text-primary transition-all"><i class="fas fa-sliders text-lg"></i></button>
                                 </div>
                             </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left">
+                            <div class="market-list-container overflow-x-auto">
+                                <table class="w-full text-left market-table">
                                     <thead class="text-[11px] text-gray-500 uppercase tracking-[4px] bg-black/20">
                                         <tr>
                                             <th class="p-6 lg:p-8">Institutional Asset</th>
@@ -888,7 +924,7 @@
     <!-- CORE SYSTEM ENGINE SCRIPT -->
     <script>
         /**
-         * ETF ELITE TERMINAL CORE v5.1.0 - UPGRADED MOBILE + NAV FIX
+         * ETF ELITE TERMINAL CORE v5.2.0 - FULL UI POLISH + MOBILE PERFECTION + MARKET FIX
          * Institutional Trading & Asset Management Engine
          */
 
@@ -917,7 +953,8 @@
             selectedCoin: null,
             chart: null,
             payMethod: 'upi',
-            isSyncing: false
+            isSyncing: false,
+            marketLoaded: false
         };
 
         // 2. AUTHENTICATION ENGINE
@@ -1000,7 +1037,7 @@
 
             // Initialize High-Frequency Market Feed
             await syncMarketData();
-            setInterval(syncMarketData, 20000); // Institutional Refresh Rate
+            setInterval(syncMarketData, 15000); // Faster refresh for premium feel
             
             // Load Content Baskets
             syncTerminalContent();
@@ -1077,11 +1114,21 @@
             });
         }
 
-        // 4. MARKET TERMINAL ENGINE (1000+ COINS)
+        // 4. MARKET TERMINAL ENGINE (1000+ COINS) - POLISHED + FASTER
         async function syncMarketData() {
+            const tbody = document.getElementById('market-list-body');
+            if (!State.marketLoaded) {
+                tbody.innerHTML = `
+                    <tr><td colspan="5" class="p-12 text-center">
+                        <div class="skeleton h-8 w-3/4 mx-auto rounded mb-4"></div>
+                        <div class="skeleton h-8 w-3/4 mx-auto rounded"></div>
+                    </td></tr>
+                `;
+            }
             try {
                 const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&sparkline=true&price_change_percentage=24h');
                 State.market = await res.json();
+                State.marketLoaded = true;
                 renderMarketTerminal();
                 updateMarketSidebar();
                 
@@ -1090,6 +1137,7 @@
                 }
             } catch (e) {
                 console.error("Market Feed Latency Detected.");
+                tbody.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-gray-500">Market feed temporarily unavailable. Retrying...</td></tr>`;
             }
         }
 
@@ -1105,7 +1153,7 @@
             
             filtered.slice(0, (State.currentPage + 1) * State.coinsPerPage).forEach(coin => {
                 const tr = document.createElement('tr');
-                tr.className = 'market-row cursor-pointer';
+                tr.className = 'market-row cursor-pointer border-b border-white/5 hover:bg-white/5';
                 tr.onclick = () => openAssetTerminal(coin);
                 
                 const change = coin.price_change_percentage_24h || 0;
@@ -1133,6 +1181,9 @@
                 `;
                 tbody.appendChild(tr);
             });
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-gray-500">No assets found matching your search.</td></tr>`;
+            }
         }
 
         function loadMoreCoins() {
@@ -1140,7 +1191,10 @@
             renderMarketTerminal();
         }
 
-        document.getElementById('market-search').addEventListener('input', renderMarketTerminal);
+        document.getElementById('market-search').addEventListener('input', () => {
+            State.currentPage = 0;
+            renderMarketTerminal();
+        });
 
         function openAssetTerminal(coin) {
             State.selectedCoin = coin;
@@ -1239,7 +1293,6 @@
 
         // 5. ASSET & CONTENT BASKETS
         function syncTerminalContent() {
-            // Demo data since DB may be empty - you can replace with real Firestore later
             const demoFeatured = [
                 { id: 'f1', type: 'featured', title: 'BTC Elite Vault', desc: 'High yield Bitcoin backed institutional portfolio.', img: 'https://picsum.photos/id/1015/800/600', roi: 28, min: 5000 },
                 { id: 'f2', type: 'featured', title: 'ETH Growth Fund', desc: 'Diversified Ethereum + Layer-2 staking basket.', img: 'https://picsum.photos/id/201/800/600', roi: 42, min: 10000 }
@@ -1345,20 +1398,17 @@
             });
         }
 
-        // 7. UTILITY & NAVIGATION MODULES (FIXED FOR MOBILE + DESKTOP SYNC)
+        // 7. UTILITY & NAVIGATION MODULES (POLISHED FOR PERFECT MOBILE + DESKTOP SYNC)
         function switchPage(pageId, el = null) {
-            // Switch pages
             document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
             const targetView = document.getElementById('view-' + pageId);
             if (targetView) targetView.classList.add('active');
 
-            // Desktop sidebar active
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             if (el && el.classList.contains('nav-link')) {
                 el.classList.add('active');
             }
 
-            // Mobile bottom nav active (sync)
             document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
             const mobileBtn = document.querySelector(`.mobile-nav-btn[data-page="${pageId}"]`);
             if (mobileBtn) mobileBtn.classList.add('active');
@@ -1366,7 +1416,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Wallet Tab Switch (MISSING FUNCTION FIXED)
         function switchWalletTab(tab, el) {
             document.querySelectorAll('.wallet-tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
@@ -1382,6 +1431,14 @@
                 holdingsDiv.innerHTML = `
                     <div class="glass-card p-8 rounded-3xl text-center">
                         <p class="text-gray-400">Demo Holdings: BTC ₹45,000 | ETH ₹28,000 | USDT ₹12,000</p>
+                    </div>
+                `;
+            } else if (tab === 'etf') {
+                const holdingsDiv = document.getElementById('wallet-pane-holdings');
+                holdingsDiv.classList.remove('hidden');
+                holdingsDiv.innerHTML = `
+                    <div class="glass-card p-8 rounded-3xl text-center">
+                        <p class="text-gray-400">ETF Portfolios: Quantum Basket ₹1,25,000 | Green Energy ₹75,000</p>
                     </div>
                 `;
             }
@@ -1433,7 +1490,6 @@
             finally { hideLoader(); }
         }
 
-        // MISSING PFP UPLOAD FUNCTION ADDED (Base64 demo for single file)
         function handlePfpUpload(input) {
             if (!input.files || !input.files[0]) return;
             showLoader();
@@ -1481,8 +1537,8 @@
 
         // Initial call for demo wallet holdings (optional)
         window.onload = () => {
-            // If needed, pre-load demo holdings here
+            // Pre-load ready
         };
     </script>
 </body>
-                </html>
+    </html>
