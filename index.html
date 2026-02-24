@@ -5,23 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ETF Investment | Elite Institutional Trading Platform</title>
     
-    <!-- SEO & PWA META -->
     <meta name="description" content="Access institutional-grade ETF and Crypto investment portfolios. Secure, fast, and high-yield.">
     <meta name="theme-color" content="#050505">
     
-    <!-- EXTERNAL LIBRARIES (CDN) -->
-    <!-- Firebase Legacy SDK (Compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
     
-    <!-- UI/UX Enhancement Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-    <!-- TAILWIND CUSTOM CONFIG -->
     <script>
         tailwind.config = {
             theme: {
@@ -44,14 +40,18 @@
         }
     </script>
 
-    <!-- CUSTOM CSS FOR ULTRA-PREMIUM UI + MOBILE OPTIMIZATIONS -->
     <style>
         :root {
             --primary: #00ff88;
             --secondary: #ffd700;
             --bg-deep: #050505;
             --surface: #121212;
-            --trans: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            --trans: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
         }
 
         body {
@@ -59,39 +59,36 @@
             color: #ffffff;
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
-            font-size: 15px; /* base font better for mobile */
+            font-size: 14px;
+            line-height: 1.5;
         }
 
-        /* Professional Scrollbar */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: var(--bg-deep); }
-        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
-        /* Glassmorphism & Effects */
         .glass-card {
-            background: rgba(18, 18, 18, 0.6);
+            background: rgba(18, 18, 18, 0.8);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
 
-        .neo-glow { box-shadow: 0 0 20px rgba(0, 255, 136, 0.15); }
-        .gold-glow { box-shadow: 0 0 20px rgba(255, 215, 0, 0.15); }
+        .neo-glow { box-shadow: 0 0 20px rgba(0, 255, 136, 0.2); }
+        .gold-glow { box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); }
 
-        /* View Animations */
         .page-view {
             display: none;
-            animation: viewEnter 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: viewEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .page-view.active { display: block; }
 
         @keyframes viewEnter {
-            from { opacity: 0; transform: translateY(40px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Navigation Hover States */
         .nav-link {
             transition: var(--trans);
             position: relative;
@@ -99,42 +96,44 @@
         .nav-link::after {
             content: '';
             position: absolute;
-            bottom: -2px; left: 50%;
+            bottom: 0; left: 50%;
             width: 0; height: 2px;
             background: var(--primary);
             transition: var(--trans);
             transform: translateX(-50%);
         }
-        .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+        .nav-link:hover::after, .nav-link.active::after { width: 80%; }
 
-        /* Mobile Bottom Nav Active + Touch Friendly */
         .mobile-nav-btn {
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            padding: 8px 0;
-            min-height: 52px;
+            transition: all 0.2s ease;
+            padding: 8px 4px;
+            min-height: 56px;
             font-size: 10px;
+            position: relative;
         }
         .mobile-nav-btn.active {
             color: var(--primary) !important;
-            transform: scale(1.08);
+            transform: translateY(-4px);
         }
-        .mobile-nav-btn i {
-            font-size: 1.35rem;
+        .mobile-nav-btn.active::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 40px; height: 3px;
+            background: var(--primary);
+            border-radius: 0 0 4px 4px;
         }
+        .mobile-nav-btn i { font-size: 20px; margin-bottom: 4px; }
 
-        /* Market Table Optimization */
         .market-row {
             transition: var(--trans);
             border-bottom: 1px solid rgba(255,255,255,0.03);
         }
-        .market-row:hover {
-            background: rgba(255,255,255,0.02);
-            transform: translateX(10px);
-        }
+        .market-row:hover { background: rgba(255,255,255,0.02); }
 
-        /* Loader Animation */
         .loader-ring {
-            width: 100px; height: 100px;
+            width: 60px; height: 60px;
             border: 3px solid #111;
             border-top: 3px solid var(--primary);
             border-radius: 50%;
@@ -142,40 +141,38 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Mobile Bottom Nav Bar */
         @media (max-width: 1024px) {
             .desktop-sidebar { display: none !important; }
             .main-content { 
                 margin-left: 0 !important; 
-                padding: 1rem !important; 
-                padding-bottom: 110px !important; 
+                padding: 16px !important; 
+                padding-bottom: 90px !important; 
             }
-            .glass-card { border-radius: 24px; }
-            h1 { font-size: 2.25rem !important; line-height: 1.1; }
-            h2 { font-size: 1.75rem !important; }
-            .text-5xl { font-size: 2.5rem !important; }
-            .text-6xl { font-size: 3rem !important; }
-            .p-12 { padding: 1.5rem !important; }
-            .p-10 { padding: 1.25rem !important; }
-            .market-row td { padding: 12px 8px !important; font-size: 13px !important; }
-            table thead th { font-size: 10px !important; padding: 12px 8px !important; }
-        }
-
-        @media (max-width: 768px) {
-            .main-content { padding: 0.75rem !important; padding-bottom: 110px !important; }
             .glass-card { border-radius: 20px; }
-            .mobile-nav-btn { min-height: 48px; }
-            .market-list-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            h1 { font-size: 1.75rem !important; line-height: 1.2; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.25rem !important; }
+            .text-5xl { font-size: 2rem !important; }
+            .text-6xl { font-size: 2.25rem !important; }
+            .p-12 { padding: 1rem !important; }
+            .p-10 { padding: 1rem !important; }
+            .p-8 { padding: 1rem !important; }
+            
+            .grid-cols-3 { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+            .grid-cols-2 { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+            
+            .flex-col-mobile { flex-direction: column !important; }
+            .w-full-mobile { width: 100% !important; }
+            .text-center-mobile { text-align: center !important; }
         }
 
-        /* Profile Image Upload Overlay */
         .pfp-overlay {
             opacity: 0;
             transition: var(--trans);
+            background: rgba(0,0,0,0.7);
         }
         .pfp-container:hover .pfp-overlay { opacity: 1; }
 
-        /* Custom Checkbox/Switch */
         .switch {
             position: relative;
             display: inline-block;
@@ -185,578 +182,676 @@
         .slider {
             position: absolute; cursor: pointer;
             top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #222;
-            transition: .4s; border-radius: 34px;
+            background-color: #333;
+            transition: .3s; border-radius: 34px;
         }
         .slider:before {
             position: absolute; content: "";
             height: 18px; width: 18px;
             left: 4px; bottom: 4px;
             background-color: white;
-            transition: .4s; border-radius: 50%;
+            transition: .3s; border-radius: 50%;
         }
         input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(24px); }
 
-        /* Wallet Tab Active */
         .wallet-tab.active {
             background: var(--primary) !important;
             color: black !important;
-            border-color: var(--primary) !important;
         }
 
-        /* Market Skeleton Loader */
+        .btn-primary {
+            background: var(--primary);
+            color: #000;
+            font-weight: 800;
+            padding: 14px 24px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: var(--trans);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,255,136,0.3); }
+        .btn-primary:active { transform: translateY(0); }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-weight: 700;
+            padding: 14px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--trans);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: var(--primary); color: var(--primary); }
+
+        .btn-danger {
+            background: rgba(255,68,68,0.1);
+            color: #ff4444;
+            border: 1px solid rgba(255,68,68,0.2);
+            font-weight: 700;
+            padding: 14px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--trans);
+        }
+        .btn-danger:hover { background: #ff4444; color: #fff; }
+
+        .card-hover {
+            transition: var(--trans);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border-color: rgba(0,255,136,0.2);
+        }
+
+        .input-field {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 14px 16px;
+            color: #fff;
+            font-size: 15px;
+            transition: var(--trans);
+            outline: none;
+        }
+        .input-field:focus { border-color: var(--primary); background: rgba(0,0,0,0.5); }
+        .input-field::placeholder { color: #666; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-primary { background: rgba(0,255,136,0.1); color: var(--primary); border: 1px solid rgba(0,255,136,0.2); }
+        .badge-secondary { background: rgba(255,215,0,0.1); color: var(--secondary); border: 1px solid rgba(255,215,0,0.2); }
+        .badge-danger { background: rgba(255,68,68,0.1); color: #ff4444; border: 1px solid rgba(255,68,68,0.2); }
+
+        .crypto-card {
+            background: linear-gradient(145deg, rgba(18,18,18,0.9) 0%, rgba(10,10,10,0.9) 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        .crypto-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0,255,136,0.3), transparent);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 16px;
+        }
+
+        @media (min-width: 1025px) {
+            .mobile-nav { display: none !important; }
+        }
+
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(5,5,5,0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .action-bar {
+            position: fixed;
+            bottom: 80px;
+            left: 16px;
+            right: 16px;
+            z-index: 50;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .floating-btn {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 20px rgba(0,255,136,0.4);
+            cursor: pointer;
+            transition: var(--trans);
+            border: none;
+        }
+        .floating-btn:hover { transform: scale(1.1) rotate(90deg); }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .metric-card {
+            background: rgba(18,18,18,0.6);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .metric-card::after {
+            content: '';
+            position: absolute;
+            top: -50%; right: -50%;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle, rgba(0,255,136,0.03) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .tab-bar {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .tab-bar::-webkit-scrollbar { display: none; }
+        
+        .tab-item {
+            flex-shrink: 0;
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--trans);
+            white-space: nowrap;
+        }
+        .tab-item.active {
+            background: var(--primary);
+            color: #000;
+            border-color: var(--primary);
+        }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255,255,255,0.03);
+            transition: var(--trans);
+        }
+        .list-item:hover { background: rgba(255,255,255,0.04); border-color: rgba(0,255,136,0.1); }
+
+        .avatar {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(0,255,136,0.2);
+        }
+
+        .price-up { color: var(--primary); }
+        .price-down { color: #ff4444; }
+
         .skeleton {
-            background: linear-gradient(90deg, #222 25%, #333 50%, #222 75%);
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%);
             background-size: 200% 100%;
-            animation: skeleton-loading 1.5s infinite;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
         }
-        @keyframes skeleton-loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        /* Fixed Button Polish */
-        button {
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        button:active {
-            transform: scale(0.96);
-        }
-
-        /* Perfect Mobile Market Table */
-        .market-table {
-            min-width: 100%;
-        }
-        @media (max-width: 640px) {
-            .market-table td:first-child { min-width: 180px; }
-        }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
     </style>
 </head>
 <body class="font-sans">
 
-    <!-- GLOBAL SYSTEM LOADER -->
     <div id="master-loader" class="fixed inset-0 z-[10000] bg-bgDeep flex flex-col items-center justify-center">
-        <div class="loader-ring mb-8"></div>
-        <h2 class="text-primary font-black tracking-[8px] text-lg">ETF ELITE TERMINAL</h2>
-        <p class="text-gray-500 text-[11px] mt-4 uppercase tracking-[5px]">Initializing Institutional Core...</p>
+        <div class="loader-ring mb-6"></div>
+        <h2 class="text-primary font-black tracking-[4px] text-sm">ETF ELITE</h2>
+        <p class="text-gray-600 text-[10px] mt-2 uppercase tracking-[3px]">Initializing...</p>
     </div>
 
-    <!-- AUTHENTICATION PORTAL -->
-    <div id="auth-view" class="fixed inset-0 z-[9000] bg-bgDeep flex items-center justify-center p-6 overflow-y-auto hidden">
-        <div class="glass-card w-full max-w-lg p-10 rounded-3xl border-primary/20">
-            <div class="text-center mb-12">
-                <i class="fas fa-shield-halved text-6xl text-primary mb-6 drop-shadow-[0_0_15px_#00ff88]"></i>
-                <h1 class="text-4xl font-black tracking-tighter">ETF <span class="text-primary">ELITE</span></h1>
-                <p class="text-gray-400 text-sm mt-3 font-medium">Access Institutional Grade Investment Pools</p>
+    <div id="auth-view" class="fixed inset-0 z-[9000] bg-bgDeep flex items-center justify-center p-4 overflow-y-auto hidden">
+        <div class="glass-card w-full max-w-md p-6 rounded-3xl border-primary/20">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-primary/20">
+                    <i class="fas fa-shield-halved text-3xl text-primary"></i>
+                </div>
+                <h1 class="text-2xl font-black tracking-tight">ETF <span class="text-primary">ELITE</span></h1>
+                <p class="text-gray-500 text-xs mt-2 font-medium">Institutional Trading Platform</p>
             </div>
 
-            <!-- Login Pane -->
-            <div id="login-pane" class="space-y-6">
+            <div id="login-pane" class="space-y-4">
                 <div>
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 block">Terminal Identity (Phone)</label>
-                    <input type="text" id="login-phone" class="w-full bg-black/50 border border-white/10 rounded-2xl px-6 py-5 focus:border-primary outline-none transition-all font-medium" placeholder="+91 00000 00000">
+                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Phone Number</label>
+                    <input type="tel" id="login-phone" class="input-field" placeholder="+91 00000 00000">
                 </div>
                 <div>
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 block">Access Key</label>
-                    <input type="password" id="login-pass" class="w-full bg-black/50 border border-white/10 rounded-2xl px-6 py-5 focus:border-primary outline-none transition-all font-medium" placeholder="••••••••">
+                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Password</label>
+                    <input type="password" id="login-pass" class="input-field" placeholder="••••••••">
                 </div>
-                <button onclick="handleAuth('login')" class="w-full bg-primary text-black font-black py-5 rounded-2xl neo-glow hover:scale-[1.02] active:scale-[0.98] transition-all text-lg">INITIALIZE SESSION</button>
-                <p class="text-center text-gray-500 text-sm mt-8">New Operator? <span onclick="toggleAuth('reg')" class="text-primary font-bold cursor-pointer hover:underline ml-2">Create Identity</span></p>
+                <button onclick="handleAuth('login')" class="btn-primary w-full mt-6">Login</button>
+                <p class="text-center text-gray-500 text-xs mt-6">New User? <span onclick="toggleAuth('reg')" class="text-primary font-bold cursor-pointer">Create Account</span></p>
             </div>
 
-            <!-- Register Pane -->
-            <div id="reg-pane" class="hidden space-y-6">
+            <div id="reg-pane" class="hidden space-y-4">
                 <div>
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 block">Full Operator Name</label>
-                    <input type="text" id="reg-name" class="w-full bg-black/50 border border-white/10 rounded-2xl px-6 py-5 focus:border-primary outline-none transition-all font-medium" placeholder="John Doe">
+                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Full Name</label>
+                    <input type="text" id="reg-name" class="input-field" placeholder="John Doe">
                 </div>
                 <div>
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 block">Terminal Identity (Phone)</label>
-                    <input type="text" id="reg-phone" class="w-full bg-black/50 border border-white/10 rounded-2xl px-6 py-5 focus:border-primary outline-none transition-all font-medium" placeholder="+91 00000 00000">
+                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Phone Number</label>
+                    <input type="tel" id="reg-phone" class="input-field" placeholder="+91 00000 00000">
                 </div>
                 <div>
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 block">Security Key</label>
-                    <input type="password" id="reg-pass" class="w-full bg-black/50 border border-white/10 rounded-2xl px-6 py-5 focus:border-primary outline-none transition-all font-medium" placeholder="Create Password">
+                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Password</label>
+                    <input type="password" id="reg-pass" class="input-field" placeholder="Min 6 characters">
                 </div>
                 <div>
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 block">Verify Security Key</label>
-                    <input type="password" id="reg-confirm" class="w-full bg-black/50 border border-white/10 rounded-2xl px-6 py-5 focus:border-primary outline-none transition-all font-medium" placeholder="Confirm Password">
+                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Confirm Password</label>
+                    <input type="password" id="reg-confirm" class="input-field" placeholder="Confirm Password">
                 </div>
-                <button onclick="handleAuth('register')" class="w-full bg-primary text-black font-black py-5 rounded-2xl neo-glow hover:scale-[1.02] active:scale-[0.98] transition-all text-lg">CREATE IDENTITY</button>
-                <p class="text-center text-gray-500 text-sm mt-8">Already Identified? <span onclick="toggleAuth('login')" class="text-primary font-bold cursor-pointer hover:underline ml-2">Login to Terminal</span></p>
+                <button onclick="handleAuth('register')" class="btn-primary w-full mt-6">Register</button>
+                <p class="text-center text-gray-500 text-xs mt-6">Already have account? <span onclick="toggleAuth('login')" class="text-primary font-bold cursor-pointer">Login</span></p>
             </div>
         </div>
     </div>
 
-    <!-- MAIN APPLICATION SHELL -->
     <div id="app-shell" class="flex min-h-screen hidden">
         
-        <!-- DESKTOP SIDEBAR -->
-        <aside class="desktop-sidebar w-80 h-screen fixed left-0 top-0 bg-surface border-r border-white/5 p-8 flex flex-col z-50">
-            <div class="flex items-center gap-5 mb-16 px-2">
-                <i class="fas fa-microchip text-4xl text-primary drop-shadow-[0_0_10px_#00ff88]"></i>
-                <h3 class="text-2xl font-black tracking-tighter">ETF <span class="text-primary">ELITE</span></h3>
+        <aside class="desktop-sidebar w-72 h-screen fixed left-0 top-0 bg-surface border-r border-white/5 p-6 flex flex-col z-50">
+            <div class="flex items-center gap-3 mb-10 px-2">
+                <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20">
+                    <i class="fas fa-microchip text-xl text-primary"></i>
+                </div>
+                <h3 class="text-xl font-black tracking-tight">ETF <span class="text-primary">ELITE</span></h3>
             </div>
 
-            <nav class="flex-grow space-y-3">
-                <div class="text-[11px] font-bold text-gray-600 uppercase tracking-[4px] mb-6 px-4">Terminal Control</div>
-                <button onclick="switchPage('home', this)" class="nav-link active w-full flex items-center gap-5 px-5 py-4 rounded-2xl text-gray-400 hover:text-white hover:bg-white/5 font-bold transition-all">
-                    <i class="fas fa-house-chimney text-xl w-8"></i><span>Dashboard</span>
+            <nav class="flex-grow space-y-1">
+                <div class="text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-4 px-4">Menu</div>
+                <button onclick="switchPage('home', this)" class="nav-link active w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all text-sm">
+                    <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </button>
-                <button onclick="switchPage('market', this)" class="nav-link w-full flex items-center gap-5 px-5 py-4 rounded-2xl text-gray-400 hover:text-white hover:bg-white/5 font-bold transition-all">
-                    <i class="fas fa-chart-line text-xl w-8"></i><span>Global Market</span>
+                <button onclick="switchPage('market', this)" class="nav-link w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all text-sm">
+                    <i class="fas fa-chart-line w-5"></i><span>Markets</span>
                 </button>
-                <button onclick="switchPage('invest', this)" class="nav-link w-full flex items-center gap-5 px-5 py-4 rounded-2xl text-gray-400 hover:text-white hover:bg-white/5 font-bold transition-all">
-                    <i class="fas fa-briefcase text-xl w-8"></i><span>Opportunities</span>
+                <button onclick="switchPage('invest', this)" class="nav-link w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all text-sm">
+                    <i class="fas fa-briefcase w-5"></i><span>Invest</span>
                 </button>
-                
-                <div class="text-[11px] font-bold text-gray-600 uppercase tracking-[4px] mt-12 mb-6 px-4">Assets & Network</div>
-                <button onclick="switchPage('wallet', this)" class="nav-link w-full flex items-center gap-5 px-5 py-4 rounded-2xl text-gray-400 hover:text-white hover:bg-white/5 font-bold transition-all">
-                    <i class="fas fa-wallet text-xl w-8"></i><span>My Assets</span>
+                <button onclick="switchPage('wallet', this)" class="nav-link w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all text-sm">
+                    <i class="fas fa-wallet w-5"></i><span>Wallet</span>
                 </button>
-                <button onclick="switchPage('referral', this)" class="nav-link w-full flex items-center gap-5 px-5 py-4 rounded-2xl text-gray-400 hover:text-white hover:bg-white/5 font-bold transition-all">
-                    <i class="fas fa-users-gear text-xl w-8"></i><span>Elite Network</span>
+                <button onclick="switchPage('referral', this)" class="nav-link w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all text-sm">
+                    <i class="fas fa-users w-5"></i><span>Network</span>
                 </button>
-
-                <div class="text-[11px] font-bold text-gray-600 uppercase tracking-[4px] mt-12 mb-6 px-4">Assistance</div>
-                <button onclick="switchPage('support', this)" class="nav-link w-full flex items-center gap-5 px-5 py-4 rounded-2xl text-gray-400 hover:text-white hover:bg-white/5 font-bold transition-all">
-                    <i class="fas fa-headset text-xl w-8"></i><span>24/7 Support</span>
+                <button onclick="switchPage('support', this)" class="nav-link w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all text-sm">
+                    <i class="fas fa-headset w-5"></i><span>Support</span>
                 </button>
             </nav>
 
-            <div class="mt-auto pt-8 border-t border-white/5">
-                <div onclick="switchPage('profile')" class="flex items-center gap-5 p-4 rounded-2xl bg-black/40 hover:bg-black/60 cursor-pointer transition-all border border-white/5">
-                    <img id="user-pfp-side" src="https://via.placeholder.com/100" class="w-12 h-12 rounded-full border-2 border-primary object-cover">
-                    <div class="overflow-hidden">
-                        <h4 id="user-name-side" class="text-sm font-black truncate">Operator</h4>
-                        <p class="text-[10px] text-gray-500 uppercase font-black tracking-widest">Elite Trader</p>
+            <div class="mt-auto pt-6 border-t border-white/5">
+                <button onclick="switchPage('profile')" class="w-full flex items-center gap-3 p-3 rounded-xl bg-black/40 hover:bg-black/60 transition-all border border-white/5 mb-3">
+                    <img id="user-pfp-side" src="https://via.placeholder.com/100" class="w-10 h-10 rounded-full border-2 border-primary object-cover">
+                    <div class="text-left overflow-hidden">
+                        <h4 id="user-name-side" class="text-sm font-bold truncate">Operator</h4>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Elite</p>
                     </div>
-                </div>
+                </button>
+                <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-danger hover:bg-danger/10 transition-all text-sm font-semibold">
+                    <i class="fas fa-power-off w-5"></i><span>Logout</span>
+                </button>
             </div>
         </aside>
 
-        <!-- MOBILE BOTTOM NAVIGATION -->
-        <div class="mobile-nav lg:hidden fixed bottom-0 left-0 w-full bg-[rgba(10,10,10,0.95)] backdrop-blur-2xl border-t border-white/10 flex justify-around py-3 z-[9999]">
-            <button onclick="switchPage('home')" class="mobile-nav-btn flex flex-col items-center gap-1 text-gray-400 active" data-page="home">
-                <i class="fas fa-house-chimney"></i><span class="text-[9px] font-bold uppercase tracking-widest">Home</span>
+        <div class="mobile-nav lg:hidden fixed bottom-0 left-0 w-full bg-[rgba(10,10,10,0.98)] backdrop-blur-xl border-t border-white/10 flex justify-around py-2 z-[9999]">
+            <button onclick="switchPage('home')" class="mobile-nav-btn flex flex-col items-center text-gray-400 active" data-page="home">
+                <i class="fas fa-home"></i><span class="text-[9px] font-bold uppercase tracking-wider mt-1">Home</span>
             </button>
-            <button onclick="switchPage('market')" class="mobile-nav-btn flex flex-col items-center gap-1 text-gray-400" data-page="market">
-                <i class="fas fa-chart-line"></i><span class="text-[9px] font-bold uppercase tracking-widest">Market</span>
+            <button onclick="switchPage('market')" class="mobile-nav-btn flex flex-col items-center text-gray-400" data-page="market">
+                <i class="fas fa-chart-line"></i><span class="text-[9px] font-bold uppercase tracking-wider mt-1">Market</span>
             </button>
-            <button onclick="switchPage('invest')" class="mobile-nav-btn flex flex-col items-center gap-1 text-gray-400" data-page="invest">
-                <i class="fas fa-briefcase"></i><span class="text-[9px] font-bold uppercase tracking-widest">Invest</span>
+            <button onclick="switchPage('invest')" class="mobile-nav-btn flex flex-col items-center text-gray-400" data-page="invest">
+                <i class="fas fa-briefcase"></i><span class="text-[9px] font-bold uppercase tracking-wider mt-1">Invest</span>
             </button>
-            <button onclick="switchPage('wallet')" class="mobile-nav-btn flex flex-col items-center gap-1 text-gray-400" data-page="wallet">
-                <i class="fas fa-wallet"></i><span class="text-[9px] font-bold uppercase tracking-widest">Wallet</span>
+            <button onclick="switchPage('wallet')" class="mobile-nav-btn flex flex-col items-center text-gray-400" data-page="wallet">
+                <i class="fas fa-wallet"></i><span class="text-[9px] font-bold uppercase tracking-wider mt-1">Wallet</span>
             </button>
-            <button onclick="switchPage('profile')" class="mobile-nav-btn flex flex-col items-center gap-1 text-gray-400" data-page="profile">
-                <i class="fas fa-user-circle"></i><span class="text-[9px] font-bold uppercase tracking-widest">Profile</span>
+            <button onclick="switchPage('profile')" class="mobile-nav-btn flex flex-col items-center text-gray-400" data-page="profile">
+                <i class="fas fa-user"></i><span class="text-[9px] font-bold uppercase tracking-wider mt-1">Profile</span>
             </button>
         </div>
 
-        <!-- MAIN CONTENT VIEWPORT -->
-        <main class="main-content flex-grow lg:ml-80 p-6 lg:p-12">
+        <main class="main-content flex-grow lg:ml-72 p-4 lg:p-8">
             
-            <!-- TOP GLOBAL HEADER -->
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-16">
+            <div class="sticky-header flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 p-4 -mx-4 lg:mx-0 lg:rounded-2xl">
                 <div>
-                    <h1 class="text-4xl font-black tracking-tight mb-3">Welcome Back, <span id="user-greeting" class="text-primary">Operator</span></h1>
-                    <div class="flex items-center gap-4">
-                        <span class="flex items-center gap-2 text-primary font-bold text-sm">
-                            <span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span> Live Terminal Active
-                        </span>
-                        <span class="text-gray-600 font-bold text-sm">•</span>
-                        <span class="text-gray-500 font-bold text-sm" id="global-timer">00:00:00 UTC</span>
+                    <h1 class="text-xl font-black tracking-tight">Welcome, <span id="user-greeting" class="text-primary">Operator</span></h1>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+                        <span class="text-gray-500 text-xs font-medium">Live • <span id="global-timer">00:00:00</span></span>
                     </div>
                 </div>
-                <div class="flex items-center gap-5">
-                    <div class="relative group">
-                        <div class="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-2xl blur opacity-25 group-hover:opacity-60 transition duration-1000"></div>
-                        <button onclick="openModal('deposit')" class="relative bg-surface px-8 py-4 rounded-2xl flex items-center gap-4 font-black border border-white/5 hover:border-primary/30 transition-all">
-                            <i class="fas fa-circle-plus text-primary text-xl"></i> Quick Deposit
-                        </button>
-                    </div>
-                    <button onclick="handleLogout()" class="bg-danger/10 text-danger p-5 rounded-2xl hover:bg-danger hover:text-white transition-all border border-danger/10">
-                        <i class="fas fa-power-off text-xl"></i>
+                <div class="flex items-center gap-3">
+                    <button onclick="openModal('deposit')" class="btn-primary text-sm py-3 px-5">
+                        <i class="fas fa-plus"></i> Deposit
+                    </button>
+                    <button onclick="openModal('withdraw')" class="btn-danger text-sm py-3 px-5">
+                        <i class="fas fa-minus"></i> Withdraw
                     </button>
                 </div>
             </div>
 
-            <!-- PAGE VIEWS ENGINE -->
-
-            <!-- VIEW: DASHBOARD HOME -->
             <section id="view-home" class="page-view active">
-                <!-- HERO BANNER -->
-                <div class="glass-card p-8 lg:p-12 rounded-[40px] mb-12 border-primary/10 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 p-12 opacity-5 group-hover:opacity-20 transition-all duration-1000">
-                        <i class="fas fa-rocket text-[180px] lg:text-[200px] text-primary rotate-12"></i>
-                    </div>
-                    <div class="relative z-10 max-w-2xl">
-                        <h2 class="text-4xl lg:text-5xl font-black tracking-tighter mb-6 leading-tight">Institutional <span class="text-primary">ETF Portfolios</span> are now Live.</h2>
-                        <p class="text-gray-400 text-base lg:text-lg font-medium leading-relaxed mb-10">Access high-yield managed assets with real-time liquidity bridge. Diversify your capital across 1000+ crypto assets and curated ETF baskets.</p>
-                        <div class="flex flex-wrap gap-5">
-                            <button onclick="switchPage('invest')" class="bg-primary text-black font-black px-10 py-5 rounded-2xl neo-glow text-lg">EXPLORE PLANS</button>
-                            <button onclick="switchPage('market')" class="bg-white/5 border border-white/10 px-10 py-5 rounded-2xl font-black text-lg hover:bg-white/10 transition-all">LIVE MARKET</button>
+                <div class="crypto-card p-6 mb-6 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
+                    <div class="relative z-10">
+                        <h2 class="text-2xl font-black mb-2 leading-tight">Institutional <span class="text-primary">ETF Portfolios</span></h2>
+                        <p class="text-gray-400 text-sm mb-6">Access high-yield managed assets with real-time liquidity.</p>
+                        <div class="flex gap-3">
+                            <button onclick="switchPage('invest')" class="btn-primary text-sm">Explore Plans</button>
+                            <button onclick="switchPage('market')" class="btn-secondary text-sm">View Market</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- KEY METRICS -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-                    <div class="glass-card p-8 lg:p-10 rounded-3xl relative overflow-hidden group border-primary/5">
-                        <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-15 transition-all">
-                            <i class="fas fa-vault text-7xl lg:text-8xl text-primary"></i>
-                        </div>
-                        <p class="text-[11px] font-bold text-gray-500 uppercase tracking-[4px] mb-6">Portfolio Net Value</p>
-                        <h2 id="bal-total" class="text-4xl lg:text-5xl font-black font-mono tracking-tighter mb-6">₹0.00</h2>
-                        <div class="flex items-center gap-3 text-primary font-bold text-sm">
-                            <i class="fas fa-arrow-trend-up"></i> +14.2% Growth This Month
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="metric-card">
+                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Total Balance</p>
+                        <h2 id="bal-total" class="text-2xl font-black font-mono tracking-tight">₹0.00</h2>
+                        <div class="flex items-center gap-1 mt-2 text-primary text-xs font-bold">
+                            <i class="fas fa-arrow-up"></i> <span>+14.2%</span>
                         </div>
                     </div>
-                    <div class="glass-card p-8 lg:p-10 rounded-3xl relative overflow-hidden group border-secondary/5">
-                        <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-15 transition-all">
-                            <i class="fas fa-chart-pie text-7xl lg:text-8xl text-secondary"></i>
-                        </div>
-                        <p class="text-[11px] font-bold text-gray-500 uppercase tracking-[4px] mb-6">Active Deployments</p>
-                        <h2 id="bal-invested" class="text-4xl lg:text-5xl font-black font-mono tracking-tighter mb-6 text-secondary">₹0.00</h2>
-                        <div class="flex items-center gap-3 text-gray-500 font-bold text-sm">
-                            <i class="fas fa-shield-check"></i> 5 Institutional Plans Active
+                    <div class="metric-card">
+                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Invested</p>
+                        <h2 id="bal-invested" class="text-2xl font-black font-mono tracking-tight text-secondary">₹0.00</h2>
+                        <div class="flex items-center gap-1 mt-2 text-gray-500 text-xs font-bold">
+                            <i class="fas fa-shield-check"></i> <span>5 Active</span>
                         </div>
                     </div>
-                    <div class="glass-card p-8 lg:p-10 rounded-3xl relative overflow-hidden group border-primary/5">
-                        <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-15 transition-all">
-                            <i class="fas fa-sack-dollar text-7xl lg:text-8xl text-primary"></i>
-                        </div>
-                        <p class="text-[11px] font-bold text-gray-500 uppercase tracking-[4px] mb-6">Realized Profit</p>
-                        <h2 id="bal-profit" class="text-4xl lg:text-5xl font-black font-mono tracking-tighter mb-6">₹0.00</h2>
-                        <div class="flex items-center gap-3 text-primary font-bold text-sm">
-                            <i class="fas fa-circle-check"></i> Verified Real-time ROI
+                    <div class="metric-card">
+                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Profit</p>
+                        <h2 id="bal-profit" class="text-2xl font-black font-mono tracking-tight">₹0.00</h2>
+                        <div class="flex items-center gap-1 mt-2 text-primary text-xs font-bold">
+                            <i class="fas fa-check-circle"></i> <span>Verified</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- FEATURED OPPORTUNITIES -->
-                <div class="flex items-center justify-between mb-10">
-                    <h2 class="text-2xl lg:text-3xl font-black tracking-tight"><i class="fas fa-fire text-secondary mr-4"></i>Elite <span class="text-primary">Opportunities</span></h2>
-                    <button onclick="switchPage('invest')" class="text-primary font-black text-sm hover:underline flex items-center gap-2">View All Assets <i class="fas fa-arrow-right"></i></button>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="section-title text-lg mb-0"><i class="fas fa-fire text-secondary"></i> Hot Opportunities</h3>
+                    <button onclick="switchPage('invest')" class="text-primary text-xs font-bold hover:underline">View All</button>
                 </div>
-                <div id="featured-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10 mb-20">
-                    <!-- Dynamic Featured Cards -->
+                <div id="featured-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                 </div>
 
-                <!-- RECENT TERMINAL LOGS -->
-                <div class="glass-card p-8 lg:p-10 rounded-[32px]">
-                    <h3 class="text-xl lg:text-2xl font-black mb-10 flex items-center gap-4">
-                        <i class="fas fa-list-ul text-primary"></i> Terminal Activity Logs
-                        <span class="text-gray-600 text-sm font-bold ml-auto">Latest 10 Sessions</span>
+                <div class="crypto-card p-4">
+                    <h3 class="font-black text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-list-ul text-primary"></i> Recent Activity
                     </h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead class="text-[11px] text-gray-500 uppercase tracking-[4px] border-b border-white/5">
-                                <tr>
-                                    <th class="pb-6">Timestamp</th>
-                                    <th class="pb-6">Operation Type</th>
-                                    <th class="pb-6">Asset Value</th>
-                                    <th class="pb-6 text-right">Settlement Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="home-tx-list" class="text-sm font-medium">
-                                <!-- Dynamic Activity Rows -->
-                            </tbody>
-                        </table>
+                    <div id="home-tx-list" class="space-y-2">
                     </div>
                 </div>
             </section>
 
-            <!-- VIEW: LIVE MARKET TERMINAL -->
             <section id="view-market" class="page-view">
-                <div class="glass-card p-8 lg:p-12 rounded-[40px] mb-12 border-primary/10 flex flex-col lg:flex-row items-center justify-between gap-12 relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent"></div>
-                    <div class="relative z-10 max-w-3xl">
-                        <h1 class="text-5xl lg:text-6xl font-black tracking-tighter mb-6">Global <span class="text-primary">Crypto Bridge</span></h1>
-                        <p class="text-gray-400 text-lg lg:text-xl font-medium leading-relaxed">Institutional grade data feeds for over 1,000+ crypto assets. Real-time liquidity monitoring and 0.01s trade execution latency.</p>
-                    </div>
-                    <div class="relative z-10 text-center lg:text-right">
-                        <div class="text-primary font-black text-3xl lg:text-4xl font-mono mb-2" id="market-price-ticker">$0.00</div>
-                        <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">Global Market Cap (BTC/USD)</p>
-                    </div>
-                </div>
-
-                <div class="flex flex-col lg:flex-row gap-10">
-                    <!-- Main Market List -->
-                    <div class="flex-grow">
-                        <div class="glass-card rounded-[32px] overflow-hidden">
-                            <div class="p-6 lg:p-8 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                                <h3 class="font-black text-xl lg:text-2xl">Asset Liquidity Pool</h3>
-                                <div class="flex items-center gap-5">
-                                    <div class="relative flex-1 md:flex-none">
-                                        <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-500"></i>
-                                        <input type="text" id="market-search" placeholder="Search 1000+ Assets..." class="bg-black/40 border border-white/10 rounded-2xl pl-14 pr-6 py-4 outline-none focus:border-primary text-sm w-full md:w-80 transition-all font-bold">
-                                    </div>
-                                    <button class="bg-surface p-4 rounded-2xl border border-white/10 hover:text-primary transition-all"><i class="fas fa-sliders text-lg"></i></button>
-                                </div>
-                            </div>
-                            <div class="market-list-container overflow-x-auto">
-                                <table class="w-full text-left market-table">
-                                    <thead class="text-[11px] text-gray-500 uppercase tracking-[4px] bg-black/20">
-                                        <tr>
-                                            <th class="p-6 lg:p-8">Institutional Asset</th>
-                                            <th class="p-6 lg:p-8">Market Price</th>
-                                            <th class="p-6 lg:p-8">24h Volatility</th>
-                                            <th class="p-6 lg:p-8">Capitalization</th>
-                                            <th class="p-6 lg:p-8 text-right">Execution</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="market-list-body">
-                                        <!-- Dynamic 1000+ Coins Loaded Here -->
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div id="market-load-more" class="p-8 lg:p-12 text-center border-t border-white/5">
-                                <button onclick="loadMoreCoins()" class="bg-white/5 px-10 py-5 rounded-2xl font-black text-primary hover:bg-primary hover:text-black transition-all flex items-center gap-3 mx-auto">
-                                    LOAD INSTITUTIONAL FEED <i class="fas fa-chevron-down"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Market Sidebar Insights -->
-                    <div class="w-full lg:w-[400px] space-y-10">
-                        <div class="glass-card p-8 lg:p-10 rounded-[32px]">
-                            <h3 class="font-black text-xl mb-8 border-b border-white/5 pb-5 flex items-center gap-3">
-                                <i class="fas fa-newspaper text-primary"></i> Elite Intelligence
-                            </h3>
-                            <div id="market-news" class="space-y-8">
-                                <!-- Dynamic Intelligence Feeds -->
-                            </div>
-                        </div>
-                        <div class="glass-card p-8 lg:p-10 rounded-[32px] bg-gradient-to-br from-surface to-black border-secondary/20">
-                            <h3 class="font-black text-xl mb-8 text-secondary flex items-center gap-3">
-                                <i class="fas fa-fire"></i> Hot Assets (24h)
-                            </h3>
-                            <div id="market-trending" class="space-y-5">
-                                <!-- Dynamic Trending Assets -->
-                            </div>
-                        </div>
-                        <div class="glass-card p-8 lg:p-10 rounded-[32px]">
-                            <h3 class="font-black text-xl mb-8 flex items-center gap-3">
-                                <i class="fas fa-chart-area text-primary"></i> Market Sentiment
-                            </h3>
-                            <div class="text-center py-6">
-                                <div class="text-5xl lg:text-6xl font-black text-primary mb-4" id="sentiment-value">78</div>
-                                <p class="text-gray-400 font-black uppercase tracking-[5px] text-xs">Extreme Greed</p>
-                                <div class="w-full h-3 bg-black/40 rounded-full mt-8 overflow-hidden">
-                                    <div class="h-full bg-primary" style="width: 78%;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- VIEW: INVESTMENT VAULT -->
-            <section id="view-invest" class="page-view">
-                <div class="mb-16">
-                    <h1 class="text-4xl lg:text-5xl font-black tracking-tight mb-5">Elite <span class="text-primary">Investment Vault</span></h1>
-                    <p class="text-gray-500 text-lg font-medium max-w-3xl leading-relaxed">Curated institutional-grade portfolios designed for high-performance ROI. Diversify your capital across global high-growth sectors with SQL-backed security.</p>
-                </div>
-
-                <div id="invest-plans-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
-                    <!-- Dynamic Investment Plans -->
-                </div>
-            </section>
-
-            <!-- VIEW: ASSET MANAGEMENT (WALLET) -->
-            <section id="view-wallet" class="page-view">
-                <div class="glass-card p-8 lg:p-12 rounded-[40px] mb-12 flex flex-col lg:flex-row items-center justify-between gap-12 border-primary/10">
-                    <div class="flex items-center gap-10">
-                        <div class="w-20 h-20 lg:w-24 lg:h-24 bg-primary/10 rounded-3xl flex items-center justify-center border border-primary/20">
-                            <i class="fas fa-wallet text-4xl lg:text-5xl text-primary"></i>
-                        </div>
+                <div class="crypto-card p-6 mb-6">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div>
-                            <p class="text-[11px] font-bold text-gray-500 uppercase tracking-[4px] mb-2">Total Managed Liquidity</p>
-                            <h1 id="wallet-total-val" class="text-5xl lg:text-6xl font-black font-mono tracking-tighter">₹0.00</h1>
+                            <h1 class="text-2xl font-black tracking-tight mb-1">Global <span class="text-primary">Markets</span></h1>
+                            <p class="text-gray-500 text-xs">Real-time crypto data feeds</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-3xl font-black font-mono text-primary" id="market-price-ticker">$0.00</div>
+                            <p class="text-[10px] text-gray-500 uppercase tracking-wider">BTC/USD</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-5 w-full lg:w-auto">
-                        <button onclick="openModal('deposit')" class="flex-grow bg-primary text-black font-black px-12 py-6 rounded-2xl neo-glow text-lg">DEPOSIT</button>
-                        <button onclick="openModal('withdraw')" class="flex-grow bg-danger/10 text-danger border border-danger/20 font-black px-12 py-6 rounded-2xl hover:bg-danger hover:text-white transition-all text-lg">WITHDRAW</button>
+                </div>
+
+                <div class="flex gap-3 mb-4">
+                    <div class="relative flex-1">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                        <input type="text" id="market-search" placeholder="Search assets..." class="input-field pl-10 text-sm">
                     </div>
+                    <button class="btn-secondary px-4" onclick="refreshMarket()"><i class="fas fa-sync-alt"></i></button>
                 </div>
 
-                <div class="flex flex-wrap gap-4 mb-10 overflow-x-auto pb-2">
-                    <button onclick="switchWalletTab('tx', this)" class="wallet-tab active px-8 py-4 rounded-2xl bg-surface border border-white/5 font-black text-gray-400 hover:text-white transition-all whitespace-nowrap">Settlement History</button>
-                    <button onclick="switchWalletTab('holdings', this)" class="wallet-tab px-8 py-4 rounded-2xl bg-surface border border-white/5 font-black text-gray-400 hover:text-white transition-all whitespace-nowrap">Asset Holdings</button>
-                    <button onclick="switchWalletTab('etf', this)" class="wallet-tab px-8 py-4 rounded-2xl bg-surface border border-white/5 font-black text-gray-400 hover:text-white transition-all whitespace-nowrap">ETF Portfolios</button>
+                <div class="tab-bar">
+                    <button class="tab-item active" onclick="filterMarket('all', this)">All</button>
+                    <button class="tab-item" onclick="filterMarket('gainers', this)">Top Gainers</button>
+                    <button class="tab-item" onclick="filterMarket('losers', this)">Top Losers</button>
+                    <button class="tab-item" onclick="filterMarket('volume', this)">Volume</button>
                 </div>
 
-                <div id="wallet-pane-tx" class="glass-card rounded-[32px] overflow-hidden">
-                    <table class="w-full text-left">
-                        <thead class="text-[11px] text-gray-500 uppercase tracking-[4px] bg-black/20">
-                            <tr>
-                                <th class="p-6 lg:p-8">Execution Date</th>
-                                <th class="p-6 lg:p-8">Operation</th>
-                                <th class="p-6 lg:p-8">Method</th>
-                                <th class="p-6 lg:p-8">Asset Value</th>
-                                <th class="p-6 lg:p-8 text-right">Settlement Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="wallet-tx-body" class="font-medium">
-                            <!-- Dynamic Transactions -->
-                        </tbody>
-                    </table>
+                <div id="market-list-container" class="space-y-2 mb-20">
                 </div>
 
-                <div id="wallet-pane-holdings" class="hidden grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <!-- Dynamic Asset Holdings -->
+                <button onclick="loadMoreCoins()" class="w-full btn-secondary mb-6">Load More Assets</button>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-20">
+                    <div class="crypto-card p-4">
+                        <h3 class="font-black text-sm mb-4 uppercase tracking-wider text-gray-400">Trending</h3>
+                        <div id="market-trending" class="space-y-2"></div>
+                    </div>
+                    <div class="crypto-card p-4">
+                        <h3 class="font-black text-sm mb-4 uppercase tracking-wider text-gray-400">Market Sentiment</h3>
+                        <div class="text-center py-4">
+                            <div class="text-4xl font-black text-primary mb-2" id="sentiment-value">78</div>
+                            <p class="text-xs text-gray-500 uppercase tracking-wider">Greed Index</p>
+                            <div class="w-full h-2 bg-black/40 rounded-full mt-4 overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-danger via-warning to-primary" style="width: 78%;"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <!-- VIEW: OPERATOR PROFILE -->
+            <section id="view-invest" class="page-view">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-black tracking-tight mb-2">Investment <span class="text-primary">Vault</span></h1>
+                    <p class="text-gray-500 text-sm">Curated institutional-grade portfolios</p>
+                </div>
+
+                <div id="invest-plans-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-20">
+                </div>
+            </section>
+
+            <section id="view-wallet" class="page-view">
+                <div class="crypto-card p-6 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Total Balance</p>
+                            <h1 id="wallet-total-val" class="text-3xl font-black font-mono tracking-tight">₹0.00</h1>
+                        </div>
+                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
+                            <i class="fas fa-wallet text-xl text-primary"></i>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="openModal('deposit')" class="btn-primary flex-1 text-sm justify-center">Deposit</button>
+                        <button onclick="openModal('withdraw')" class="btn-danger flex-1 text-sm justify-center">Withdraw</button>
+                    </div>
+                </div>
+
+                <div class="tab-bar">
+                    <button class="wallet-tab tab-item active" onclick="switchWalletTab('tx', this)">History</button>
+                    <button class="wallet-tab tab-item" onclick="switchWalletTab('holdings', this)">Holdings</button>
+                    <button class="wallet-tab tab-item" onclick="switchWalletTab('etf', this)">ETF Plans</button>
+                </div>
+
+                <div id="wallet-pane-tx" class="space-y-2 mb-20">
+                </div>
+
+                <div id="wallet-pane-holdings" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mb-20">
+                </div>
+
+                <div id="wallet-pane-etf" class="hidden space-y-4 mb-20">
+                </div>
+            </section>
+
             <section id="view-profile" class="page-view">
-                <div class="max-w-5xl mx-auto">
-                    <div class="glass-card p-10 lg:p-16 rounded-[48px] text-center mb-12 relative overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent"></div>
-                        <div class="relative z-10">
-                            <div class="w-36 h-36 lg:w-44 lg:h-44 mx-auto relative mb-8 group pfp-container">
-                                <img id="prof-pfp" src="https://via.placeholder.com/200" class="w-full h-full rounded-full border-4 border-primary object-cover shadow-2xl transition-all group-hover:brightness-50">
-                                <label for="pfp-upload" class="absolute inset-0 flex items-center justify-center cursor-pointer pfp-overlay rounded-full">
-                                    <i class="fas fa-camera text-4xl text-white"></i>
-                                </label>
-                                <input type="file" id="pfp-upload" class="hidden" accept="image/*" onchange="handlePfpUpload(this)">
-                            </div>
-                            <h1 id="prof-name" class="text-4xl lg:text-5xl font-black mb-3 tracking-tight">Operator Name</h1>
-                            <p id="prof-phone" class="text-gray-500 font-mono text-xl mb-8 tracking-widest">+91 00000 00000</p>
-                            <div class="flex items-center justify-center gap-5">
-                                <span class="bg-secondary/10 text-secondary border border-secondary/20 px-6 py-3 rounded-full text-[11px] font-black tracking-[4px] uppercase">Elite Operator</span>
-                                <span class="bg-primary/10 text-primary border border-primary/20 px-6 py-3 rounded-full text-[11px] font-black tracking-[4px] uppercase">Verified ID</span>
-                            </div>
+                <div class="max-w-2xl mx-auto">
+                    <div class="crypto-card p-8 text-center mb-6">
+                        <div class="w-24 h-24 mx-auto relative mb-4 group pfp-container">
+                            <img id="prof-pfp" src="https://via.placeholder.com/200" class="w-full h-full rounded-full border-4 border-primary object-cover">
+                            <label for="pfp-upload" class="absolute inset-0 flex items-center justify-center cursor-pointer pfp-overlay rounded-full">
+                                <i class="fas fa-camera text-2xl text-white"></i>
+                            </label>
+                            <input type="file" id="pfp-upload" class="hidden" accept="image/*" onchange="handlePfpUpload(this)">
+                        </div>
+                        <h1 id="prof-name" class="text-xl font-black mb-1">Operator Name</h1>
+                        <p id="prof-phone" class="text-gray-500 font-mono text-sm mb-4">+91 00000 00000</p>
+                        <div class="flex items-center justify-center gap-2">
+                            <span class="badge badge-secondary">Elite</span>
+                            <span class="badge badge-primary">Verified</span>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                        <!-- Identity Settings -->
-                        <div class="glass-card p-8 lg:p-10 rounded-[32px]">
-                            <h3 class="text-2xl font-black mb-10 border-b border-white/5 pb-5 flex items-center gap-4">
-                                <i class="fas fa-user-shield text-primary"></i> Terminal Identity
-                            </h3>
-                            <div class="space-y-8">
+                    <div class="space-y-4 mb-20">
+                        <div class="crypto-card p-6">
+                            <h3 class="font-black text-sm mb-4 uppercase tracking-wider text-gray-400">Payment Details</h3>
+                            <div class="space-y-4">
                                 <div>
-                                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-[4px] mb-3 block">Settlement UPI ID</label>
-                                    <input type="text" id="prof-upi" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 focus:border-primary outline-none transition-all font-bold" placeholder="operator@upi">
+                                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">UPI ID</label>
+                                    <input type="text" id="prof-upi" class="input-field text-sm" placeholder="name@upi">
                                 </div>
                                 <div>
-                                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-[4px] mb-3 block">Crypto Bridge Address (BTC/ETH)</label>
-                                    <input type="text" id="prof-crypto" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 focus:border-primary outline-none transition-all font-bold" placeholder="0x... or bc1...">
+                                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Crypto Address</label>
+                                    <input type="text" id="prof-crypto" class="input-field text-sm" placeholder="0x... or bc1...">
                                 </div>
-                                <button onclick="saveProfileSettings()" class="w-full bg-primary text-black font-black py-5 rounded-2xl neo-glow text-lg">UPDATE TERMINAL IDENTITY</button>
+                                <button onclick="saveProfileSettings()" class="btn-primary w-full text-sm">Update Details</button>
                             </div>
                         </div>
 
-                        <!-- Security Protocol -->
-                        <div class="glass-card p-8 lg:p-10 rounded-[32px]">
-                            <h3 class="text-2xl font-black mb-10 border-b border-white/5 pb-5 flex items-center gap-4">
-                                <i class="fas fa-lock text-primary"></i> Security Protocol
-                            </h3>
-                            <div class="space-y-8">
-                                <div class="flex items-center justify-between p-6 bg-black/40 rounded-2xl border border-white/5">
-                                    <div>
-                                        <h4 class="font-black text-lg">Multi-Factor Auth</h4>
-                                        <p class="text-[11px] text-gray-500 font-bold uppercase tracking-widest mt-1">Institutional security for withdrawals</p>
+                        <div class="crypto-card p-6">
+                            <h3 class="font-black text-sm mb-4 uppercase tracking-wider text-gray-400">Security</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-4 bg-black/30 rounded-xl border border-white/5">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fas fa-shield-alt text-primary"></i>
+                                        <span class="font-semibold text-sm">Two-Factor Auth</span>
                                     </div>
                                     <label class="switch">
                                         <input type="checkbox" checked>
                                         <span class="slider"></span>
                                     </label>
                                 </div>
-                                <div class="flex items-center justify-between p-6 bg-black/40 rounded-2xl border border-white/5">
-                                    <div>
-                                        <h4 class="font-black text-lg">Real-time Alerts</h4>
-                                        <p class="text-[11px] text-gray-500 font-bold uppercase tracking-widest mt-1">Instant SMS & Terminal notifications</p>
+                                <div class="flex items-center justify-between p-4 bg-black/30 rounded-xl border border-white/5">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fas fa-bell text-primary"></i>
+                                        <span class="font-semibold text-sm">Notifications</span>
                                     </div>
                                     <label class="switch">
                                         <input type="checkbox" checked>
                                         <span class="slider"></span>
                                     </label>
-                                </div>
-                                <div class="p-8 bg-danger/5 border border-danger/10 rounded-2xl">
-                                    <p class="text-[11px] text-danger font-black uppercase tracking-[4px] mb-4">Emergency Protocol</p>
-                                    <button class="text-danger font-black text-sm hover:underline flex items-center gap-3">
-                                        <i class="fas fa-triangle-exclamation"></i> Freeze All Terminal Assets
-                                    </button>
                                 </div>
                             </div>
                         </div>
+
+                        <button onclick="handleLogout()" class="btn-danger w-full"><i class="fas fa-power-off"></i> Logout</button>
                     </div>
                 </div>
             </section>
 
-            <!-- VIEW: ELITE NETWORK (REFERRAL) -->
             <section id="view-referral" class="page-view">
-                <div class="glass-card p-10 lg:p-16 rounded-[48px] mb-12 border-secondary/10 bg-gradient-to-br from-surface to-black relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 p-16 opacity-5 group-hover:opacity-15 transition-all duration-1000">
-                        <i class="fas fa-users-viewfinder text-[180px] lg:text-[200px] text-secondary"></i>
+                <div class="crypto-card p-6 mb-6 border-secondary/20">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-3 border border-secondary/20">
+                            <i class="fas fa-users text-2xl text-secondary"></i>
+                        </div>
+                        <h1 class="text-2xl font-black tracking-tight mb-2">Elite <span class="text-secondary">Network</span></h1>
+                        <p class="text-gray-500 text-xs">Earn commissions on referrals</p>
                     </div>
-                    <div class="relative z-10 max-w-3xl">
-                        <h1 class="text-5xl lg:text-6xl font-black tracking-tighter mb-6 text-secondary">Elite <span class="text-white">Network</span></h1>
-                        <p class="text-gray-400 text-xl font-medium leading-relaxed mb-10">Expand the SQL Elite network and earn institutional commissions on every successful referral. Grow your network, grow your wealth.</p>
-                        <div class="flex items-center gap-5">
-                            <input type="text" id="ref-link-input" readonly class="bg-black/40 border border-white/10 rounded-2xl px-8 py-5 focus:border-secondary outline-none text-secondary font-mono font-bold text-lg flex-grow tracking-wider">
-                            <button onclick="copyRefLink()" class="bg-secondary text-black font-black px-10 py-5 rounded-2xl gold-glow text-lg">COPY LINK</button>
+                    
+                    <div class="bg-black/40 rounded-xl p-4 mb-4 border border-white/5">
+                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Your Referral Link</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="ref-link-input" readonly class="input-field text-xs flex-1" value="">
+                            <button onclick="copyRefLink()" class="btn-primary px-4"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
+
+                    <button onclick="shareRefWA()" class="btn-secondary w-full border-secondary/20 text-secondary">
+                        <i class="fab fa-whatsapp"></i> Share on WhatsApp
+                    </button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-                    <div class="glass-card p-10 rounded-3xl border-secondary/5">
-                        <p class="text-[11px] font-bold text-gray-500 uppercase tracking-[4px] mb-4">Total Network Operators</p>
-                        <h2 id="ref-count" class="text-5xl font-black font-mono tracking-tighter text-secondary">0</h2>
+                <div class="grid grid-cols-3 gap-3 mb-6">
+                    <div class="metric-card text-center p-4">
+                        <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Referrals</p>
+                        <h2 id="ref-count" class="text-xl font-black text-secondary">0</h2>
                     </div>
-                    <div class="glass-card p-10 rounded-3xl border-secondary/5">
-                        <p class="text-[11px] font-bold text-gray-500 uppercase tracking-[4px] mb-4">Network Commission</p>
-                        <h2 id="ref-earned" class="text-5xl font-black font-mono tracking-tighter text-secondary">₹0.00</h2>
+                    <div class="metric-card text-center p-4">
+                        <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Earned</p>
+                        <h2 id="ref-earned" class="text-xl font-black text-secondary">₹0</h2>
                     </div>
-                    <div class="glass-card p-10 rounded-3xl border-secondary/5">
-                        <p class="text-[11px] font-bold text-gray-500 uppercase tracking-[4px] mb-4">Current Network Rank</p>
-                        <h2 class="text-5xl font-black font-mono tracking-tighter text-secondary">SILVER</h2>
+                    <div class="metric-card text-center p-4">
+                        <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Rank</p>
+                        <h2 class="text-lg font-black text-secondary">SILVER</h2>
                     </div>
                 </div>
-
-                <button onclick="shareRefWA()" class="w-full bg-secondary text-black font-black py-6 rounded-3xl gold-glow text-2xl flex items-center justify-center gap-5">
-                    <i class="fab fa-whatsapp text-3xl"></i> BROADCAST TO NETWORK
-                </button>
             </section>
 
-            <!-- VIEW: ELITE SUPPORT -->
             <section id="view-support" class="page-view">
-                <div class="max-w-4xl mx-auto text-center">
-                    <div class="w-28 h-28 lg:w-32 lg:h-32 bg-primary/10 rounded-[40px] flex items-center justify-center mx-auto mb-10 border border-primary/20">
-                        <i class="fas fa-headset text-5xl lg:text-6xl text-primary"></i>
+                <div class="text-center mb-8 pt-4">
+                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-primary/20">
+                        <i class="fas fa-headset text-2xl text-primary"></i>
                     </div>
-                    <h1 class="text-5xl lg:text-6xl font-black tracking-tight mb-6">Elite <span class="text-primary">Support</span></h1>
-                    <p class="text-gray-400 text-xl font-medium leading-relaxed mb-16 max-w-2xl mx-auto">Direct encrypted lines to institutional support managers. Available 24/7 for Elite terminal operators.</p>
-                    
-                    <div id="support-line-container" class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
-                        <!-- Dynamic Support Lines -->
-                    </div>
+                    <h1 class="text-2xl font-black tracking-tight mb-2">24/7 <span class="text-primary">Support</span></h1>
+                    <p class="text-gray-500 text-sm">Direct line to institutional managers</p>
+                </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div class="glass-card p-10 rounded-3xl">
-                            <i class="fas fa-shield-check text-4xl text-primary mb-6"></i>
-                            <h4 class="font-black text-lg mb-4 uppercase tracking-widest">Fund Safety</h4>
-                            <p class="text-gray-500 text-sm font-medium">100% Institutional Guarantee on all assets.</p>
-                        </div>
-                        <div class="glass-card p-10 rounded-3xl">
-                            <i class="fas fa-bolt text-4xl text-primary mb-6"></i>
-                            <h4 class="font-black text-lg mb-4 uppercase tracking-widest">Fast Settlement</h4>
-                            <p class="text-gray-500 text-sm font-medium">Instant bridge execution for all liquidations.</p>
-                        </div>
-                        <div class="glass-card p-10 rounded-3xl">
-                            <i class="fas fa-lock text-4xl text-primary mb-6"></i>
-                            <h4 class="font-black text-lg mb-4 uppercase tracking-widest">Privacy First</h4>
-                            <p class="text-gray-500 text-sm font-medium">End-to-end encrypted terminal communications.</p>
-                        </div>
+                <div id="support-line-container" class="space-y-3 mb-8">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="metric-card text-center p-6">
+                        <i class="fas fa-shield-check text-2xl text-primary mb-3"></i>
+                        <h4 class="font-bold text-sm mb-1">Fund Safety</h4>
+                        <p class="text-gray-500 text-xs">100% Guaranteed</p>
+                    </div>
+                    <div class="metric-card text-center p-6">
+                        <i class="fas fa-bolt text-2xl text-primary mb-3"></i>
+                        <h4 class="font-bold text-sm mb-1">Fast Settlement</h4>
+                        <p class="text-gray-500 text-xs">Instant Execution</p>
+                    </div>
+                    <div class="metric-card text-center p-6">
+                        <i class="fas fa-lock text-2xl text-primary mb-3"></i>
+                        <h4 class="font-bold text-sm mb-1">Privacy First</h4>
+                        <p class="text-gray-500 text-xs">End-to-End Encrypted</p>
                     </div>
                 </div>
             </section>
@@ -764,200 +859,170 @@
         </main>
     </div>
 
-    <!-- MODAL SYSTEM OVERLAYS -->
-    
-    <!-- Modal: Deposit -->
-    <div id="modal-deposit" class="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-6 hidden">
-        <div class="glass-card w-full max-w-2xl p-12 rounded-[40px] border-primary/20 relative overflow-y-auto max-h-[90vh]">
-            <button onclick="closeModal('deposit')" class="absolute top-8 right-8 text-gray-500 hover:text-danger text-3xl transition-all">&times;</button>
-            <h2 class="text-4xl font-black mb-3 tracking-tight">Initialize <span class="text-primary">Deposit</span></h2>
-            <p class="text-gray-500 text-lg font-medium mb-10">Select settlement method and asset value.</p>
+    <div id="modal-deposit" class="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-xl flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+        <div class="glass-card w-full max-w-lg p-6 rounded-t-3xl sm:rounded-3xl border-primary/20 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-black">Deposit <span class="text-primary">Funds</span></h2>
+                <button onclick="closeModal('deposit')" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
             
-            <div class="space-y-10">
+            <div class="space-y-4">
                 <div>
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-[4px] mb-4 block">Deposit Asset Value (₹)</label>
-                    <input type="number" id="dep-amt" class="w-full bg-black/40 border border-white/10 rounded-3xl px-8 py-6 focus:border-primary outline-none text-4xl font-mono font-black tracking-tighter" placeholder="Min ₹500">
-                    <div class="flex flex-wrap gap-3 mt-6">
-                        <button onclick="setDep(1000)" class="flex-grow bg-white/5 py-4 rounded-2xl text-sm font-black hover:bg-primary hover:text-black transition-all">₹1,000</button>
-                        <button onclick="setDep(5000)" class="flex-grow bg-white/5 py-4 rounded-2xl text-sm font-black hover:bg-primary hover:text-black transition-all">₹5,000</button>
-                        <button onclick="setDep(10000)" class="flex-grow bg-white/5 py-4 rounded-2xl text-sm font-black hover:bg-primary hover:text-black transition-all">₹10,000</button>
-                        <button onclick="setDep(50000)" class="flex-grow bg-white/5 py-4 rounded-2xl text-sm font-black hover:bg-primary hover:text-black transition-all">₹50,000</button>
+                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Amount (₹)</label>
+                    <input type="number" id="dep-amt" class="input-field text-2xl font-black text-center" placeholder="0.00">
+                    <div class="grid grid-cols-4 gap-2 mt-3">
+                        <button onclick="setDep(1000)" class="btn-secondary text-xs py-2">₹1K</button>
+                        <button onclick="setDep(5000)" class="btn-secondary text-xs py-2">₹5K</button>
+                        <button onclick="setDep(10000)" class="btn-secondary text-xs py-2">₹10K</button>
+                        <button onclick="setDep(50000)" class="btn-secondary text-xs py-2">₹50K</button>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <button onclick="switchPay('upi')" id="pay-btn-upi" class="pay-tab active p-8 rounded-3xl bg-surface border-2 border-primary/20 text-center group transition-all">
-                        <i class="fas fa-mobile-screen text-3xl mb-4 text-primary group-hover:scale-110 transition-all"></i>
-                        <p class="text-sm font-black uppercase tracking-widest">UPI Settlement</p>
+                <div class="flex gap-3">
+                    <button onclick="switchPay('upi')" id="pay-btn-upi" class="flex-1 p-4 rounded-xl bg-surface border-2 border-primary/20 text-center">
+                        <i class="fas fa-mobile-alt text-2xl text-primary mb-2"></i>
+                        <p class="text-xs font-bold">UPI</p>
                     </button>
-                    <button onclick="switchPay('crypto')" id="pay-btn-crypto" class="pay-tab p-8 rounded-3xl bg-surface border-2 border-white/5 text-center group transition-all">
-                        <i class="fab fa-bitcoin text-3xl mb-4 text-gray-500 group-hover:text-primary transition-all"></i>
-                        <p class="text-sm font-black uppercase tracking-widest">Crypto Bridge</p>
+                    <button onclick="switchPay('crypto')" id="pay-btn-crypto" class="flex-1 p-4 rounded-xl bg-surface border-2 border-white/5 text-center">
+                        <i class="fab fa-bitcoin text-2xl text-gray-500 mb-2"></i>
+                        <p class="text-xs font-bold">Crypto</p>
                     </button>
                 </div>
 
-                <!-- UPI Pane -->
-                <div id="pane-upi" class="p-10 bg-black/40 rounded-[32px] border border-dashed border-primary/30 text-center">
-                    <p class="text-[11px] text-gray-500 font-bold uppercase tracking-[4px] mb-4">Elite UPI Identity</p>
-                    <h3 id="disp-adm-upi" class="text-2xl font-mono font-black text-primary mb-8 tracking-wider">loading...</h3>
-                    <div class="w-56 h-56 bg-white mx-auto rounded-3xl flex items-center justify-center text-black font-black mb-8 text-xl">QR SCANNER</div>
-                    <a href="#" id="upi-link" class="block w-full bg-primary text-black font-black py-6 rounded-2xl neo-glow text-lg">OPEN UPI TERMINAL</a>
+                <div id="pane-upi" class="p-4 bg-black/40 rounded-xl border border-dashed border-primary/30 text-center space-y-3">
+                    <p class="text-[10px] text-gray-500 uppercase tracking-wider">Pay to UPI ID</p>
+                    <h3 id="disp-adm-upi" class="text-lg font-mono font-black text-primary select-all">loading...</h3>
+                    <a href="#" id="upi-link" class="btn-primary w-full text-sm">Open UPI App</a>
                 </div>
 
-                <!-- Crypto Pane -->
-                <div id="pane-crypto" class="hidden p-10 bg-black/40 rounded-[32px] border border-dashed border-primary/30 space-y-8">
+                <div id="pane-crypto" class="hidden p-4 bg-black/40 rounded-xl border border-dashed border-primary/30 space-y-3">
                     <div>
-                        <p class="text-[11px] text-gray-500 font-bold uppercase tracking-[4px] mb-2">BTC Bridge Address</p>
-                        <p id="disp-adm-btc" class="text-sm font-mono text-secondary font-bold break-all tracking-wider">loading...</p>
+                        <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-1">BTC Address</p>
+                        <p id="disp-adm-btc" class="text-xs font-mono text-secondary break-all select-all">loading...</p>
                     </div>
                     <div>
-                        <p class="text-[11px] text-gray-500 font-bold uppercase tracking-[4px] mb-2">ETH Bridge Address</p>
-                        <p id="disp-adm-eth" class="text-sm font-mono text-secondary font-bold break-all tracking-wider">loading...</p>
+                        <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-1">ETH Address</p>
+                        <p id="disp-adm-eth" class="text-xs font-mono text-secondary break-all select-all">loading...</p>
                     </div>
                 </div>
 
                 <div>
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-[4px] mb-4 block">Settlement Reference (UTR / Hash)</label>
-                    <input type="text" id="dep-ref" class="w-full bg-black/40 border border-white/10 rounded-2xl px-8 py-6 focus:border-primary outline-none font-bold" placeholder="Enter Transaction Reference">
+                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Transaction Reference (UTR/Hash)</label>
+                    <input type="text" id="dep-ref" class="input-field text-sm" placeholder="Enter reference number">
                 </div>
 
-                <button onclick="submitDeposit()" class="w-full bg-primary text-black font-black py-6 rounded-2xl neo-glow text-xl">SUBMIT SETTLEMENT</button>
+                <button onclick="submitDeposit()" class="btn-primary w-full">Submit Deposit</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Withdraw -->
-    <div id="modal-withdraw" class="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-6 hidden">
-        <div class="glass-card w-full max-w-2xl p-12 rounded-[40px] border-danger/20 relative">
-            <button onclick="closeModal('withdraw')" class="absolute top-8 right-8 text-gray-500 hover:text-danger text-3xl transition-all">&times;</button>
-            <h2 class="text-4xl font-black mb-3 tracking-tight">Asset <span class="text-danger">Liquidation</span></h2>
-            <p class="text-gray-500 text-lg font-medium mb-12">Initialize withdrawal to your verified destination.</p>
+    <div id="modal-withdraw" class="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-xl flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+        <div class="glass-card w-full max-w-lg p-6 rounded-t-3xl sm:rounded-3xl border-danger/20 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-black">Withdraw <span class="text-danger">Funds</span></h2>
+                <button onclick="closeModal('withdraw')" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
             
-            <div class="space-y-10">
-                <div class="p-10 bg-black/40 rounded-[32px] border border-white/5">
-                    <p class="text-[11px] text-gray-500 font-bold uppercase tracking-[4px] mb-3">Withdrawable Balance</p>
-                    <h2 id="wd-max" class="text-6xl font-black font-mono tracking-tighter">₹0.00</h2>
+            <div class="space-y-4">
+                <div class="p-4 bg-danger/5 rounded-xl border border-danger/10">
+                    <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Available Balance</p>
+                    <h2 id="wd-max" class="text-3xl font-black font-mono text-danger">₹0.00</h2>
                 </div>
 
                 <div>
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-[4px] mb-4 block">Liquidation Value (₹)</label>
-                    <input type="number" id="wd-amt" class="w-full bg-black/40 border border-white/10 rounded-3xl px-8 py-6 focus:border-danger outline-none text-4xl font-mono font-black tracking-tighter" placeholder="Enter Amount">
+                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Withdraw Amount (₹)</label>
+                    <input type="number" id="wd-amt" class="input-field text-2xl font-black text-center" placeholder="0.00">
                 </div>
 
-                <div class="p-8 bg-surface border border-white/5 rounded-[32px]">
-                    <p class="text-[11px] text-gray-500 font-bold uppercase tracking-[4px] mb-3">Settlement Identity</p>
-                    <h4 id="wd-dest" class="text-xl font-black text-primary tracking-tight">Not Configured</h4>
-                    <p class="text-[11px] text-gray-500 mt-3 font-bold uppercase tracking-widest">Update identity in Terminal Settings</p>
+                <div class="p-4 bg-surface rounded-xl border border-white/5">
+                    <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Destination</p>
+                    <p id="wd-dest" class="font-bold text-primary">Not Configured</p>
+                    <p class="text-[10px] text-gray-500 mt-1">Update in Profile settings</p>
                 </div>
 
-                <button onclick="submitWithdraw()" class="w-full bg-danger text-white font-black py-6 rounded-2xl shadow-[0_20px_40px_rgba(255,68,68,0.2)] text-xl">INITIALIZE LIQUIDATION</button>
+                <button onclick="submitWithdraw()" class="btn-danger w-full">Confirm Withdrawal</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Crypto Asset Terminal -->
-    <div id="modal-crypto" class="fixed inset-0 z-[1000] bg-black/98 backdrop-blur-3xl flex items-center justify-center p-6 hidden">
-        <div class="glass-card w-full max-w-6xl p-12 rounded-[48px] border-primary/20 relative overflow-y-auto max-h-[95vh]">
-            <button onclick="closeModal('crypto')" class="absolute top-10 right-10 text-gray-500 hover:text-danger text-4xl transition-all">&times;</button>
-            
-            <div class="flex flex-col lg:flex-row lg:items-center gap-10 mb-16">
-                <img id="cm-icon" src="" class="w-24 h-24 rounded-full border-4 border-primary/20">
-                <div>
-                    <h2 id="cm-name" class="text-6xl font-black tracking-tighter">Bitcoin</h2>
-                    <p id="cm-sym" class="text-gray-500 font-mono text-2xl uppercase font-bold tracking-[5px]">BTC</p>
+    <div id="modal-crypto" class="fixed inset-0 z-[1000] bg-black/98 backdrop-blur-xl flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+        <div class="glass-card w-full max-w-4xl p-6 rounded-t-3xl sm:rounded-3xl border-primary/20 max-h-[95vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-4">
+                    <img id="cm-icon" src="" class="w-12 h-12 rounded-full border-2 border-primary/20">
+                    <div>
+                        <h2 id="cm-name" class="text-xl font-black">Bitcoin</h2>
+                        <p id="cm-sym" class="text-gray-500 text-xs font-mono uppercase tracking-wider">BTC</p>
+                    </div>
                 </div>
-                <div class="lg:ml-auto text-center lg:text-right">
-                    <h2 id="cm-price" class="text-6xl font-black font-mono tracking-tighter mb-2">$0.00</h2>
-                    <p id="cm-change" class="text-primary font-black text-2xl">+0.00%</p>
+                <div class="text-right">
+                    <h2 id="cm-price" class="text-2xl font-black font-mono">$0.00</h2>
+                    <p id="cm-change" class="text-primary text-sm font-bold">+0.00%</p>
                 </div>
+                <button onclick="closeModal('crypto')" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white ml-4"><i class="fas fa-times"></i></button>
             </div>
 
-            <!-- Professional Trading Chart -->
-            <div class="bg-black/40 rounded-[40px] p-10 border border-white/5 mb-16 h-[450px]">
+            <div class="chart-container mb-6">
                 <canvas id="cm-chart"></canvas>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                <div class="space-y-10">
-                    <h3 class="font-black text-3xl border-b border-white/5 pb-6">Institutional Metrics</h3>
-                    <div class="grid grid-cols-2 gap-6">
-                        <div class="p-8 bg-white/5 rounded-3xl border border-white/5">
-                            <p class="text-[11px] text-gray-500 font-bold uppercase tracking-[4px] mb-3">Market Cap</p>
-                            <p id="cm-cap" class="font-mono font-black text-xl tracking-tight">$0.00</p>
-                        </div>
-                        <div class="p-8 bg-white/5 rounded-3xl border border-white/5">
-                            <p class="text-[11px] text-gray-500 font-bold uppercase tracking-[4px] mb-3">24h Trade Volume</p>
-                            <p id="cm-vol" class="font-mono font-black text-xl tracking-tight">$0.00</p>
-                        </div>
-                        <div class="p-8 bg-white/5 rounded-3xl border border-white/5">
-                            <p class="text-[11px] text-gray-500 font-bold uppercase tracking-[4px] mb-3">Institutional High</p>
-                            <p id="cm-high" class="font-mono font-black text-xl text-primary tracking-tight">$0.00</p>
-                        </div>
-                        <div class="p-8 bg-white/5 rounded-3xl border border-white/5">
-                            <p class="text-[11px] text-gray-500 font-bold uppercase tracking-[4px] mb-3">Institutional Low</p>
-                            <p id="cm-low" class="font-mono font-black text-xl text-danger tracking-tight">$0.00</p>
-                        </div>
-                    </div>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+                <div class="metric-card p-3 text-center">
+                    <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Market Cap</p>
+                    <p id="cm-cap" class="font-mono font-bold text-sm">$0.00</p>
                 </div>
+                <div class="metric-card p-3 text-center">
+                    <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Volume (24h)</p>
+                    <p id="cm-vol" class="font-mono font-bold text-sm">$0.00</p>
+                </div>
+                <div class="metric-card p-3 text-center">
+                    <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-1">High (24h)</p>
+                    <p id="cm-high" class="font-mono font-bold text-sm text-primary">$0.00</p>
+                </div>
+                <div class="metric-card p-3 text-center">
+                    <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Low (24h)</p>
+                    <p id="cm-low" class="font-mono font-bold text-sm text-danger">$0.00</p>
+                </div>
+            </div>
 
-                <div class="space-y-10">
-                    <h3 class="font-black text-3xl border-b border-white/5 pb-6">Execute Institutional Order</h3>
-                    <div class="space-y-8">
-                        <div>
-                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-[4px] mb-4 block">Acquisition Protocol</label>
-                            <select id="cm-buy-type" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 focus:border-primary outline-none font-bold text-lg">
-                                <option value="direct">Direct Institutional Acquisition</option>
-                                <option value="etf">ETF-Backed Synthetic Bridge</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-[4px] mb-4 block">Asset Value (USD)</label>
-                            <input type="number" id="cm-buy-amt" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 focus:border-primary outline-none text-3xl font-mono font-black tracking-tighter" placeholder="$100.00">
-                        </div>
-                        <button onclick="executeOrder()" class="w-full bg-primary text-black font-black py-6 rounded-2xl neo-glow text-xl">EXECUTE MARKET ORDER</button>
-                    </div>
+            <div class="crypto-card p-4">
+                <h3 class="font-black text-sm mb-4">Quick Trade</h3>
+                <div class="flex gap-3">
+                    <input type="number" id="cm-buy-amt" class="input-field flex-1" placeholder="Amount (USD)">
+                    <button onclick="executeOrder()" class="btn-primary px-6">Buy</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- CORE SYSTEM ENGINE SCRIPT -->
     <script>
-        /**
-         * ETF ELITE TERMINAL CORE v5.2.0 - FULL UI POLISH + MOBILE PERFECTION + MARKET FIX
-         * Institutional Trading & Asset Management Engine
-         */
-
-        // 1. INITIALIZATION & FIREBASE SYNC
         const firebaseConfig = {
             apiKey: "AIzaSyBvObxADcAior6R_or9O6UmWsFT8do1GkI",
             authDomain: "sqladmin-ff04d.firebaseapp.com",
             projectId: "sqladmin-ff04d",
             storageBucket: "sqladmin-ff04d.firebasestorage.app",
             messagingSenderId: "539086978850",
-            appId: "1:539086978850:web:261e6a0cf3c9a2aa29ef7b"
+            appId: "1:539086978850:web:261e6a0cf3c9a2aa29ef7b",
+            measurementId: "G-KH4J0CZ9M5"
         };
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // Global Application State Matrix
         const State = {
             user: null,
             userData: null,
             admin: {},
             market: [],
             currentPage: 0,
-            coinsPerPage: 40,
+            coinsPerPage: 20,
             selectedCoin: null,
             chart: null,
             payMethod: 'upi',
-            isSyncing: false,
-            marketLoaded: false
+            marketFilter: 'all'
         };
 
-        // 2. AUTHENTICATION ENGINE
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 State.user = user;
@@ -982,12 +1047,12 @@
                     const pass = document.getElementById('reg-pass').value;
                     const confirm = document.getElementById('reg-confirm').value;
 
-                    if (!name || !phone || pass !== confirm || pass.length < 6) throw new Error("Operator Validation Failed.");
+                    if (!name || !phone || pass !== confirm || pass.length < 6) throw new Error("Validation Failed");
                     
-                    const email = `${phone.replace(/\s+/g, '')}@sql-elite.com`;
+                    const email = `${phone.replace(/\D/g, '')}@etf-elite.com`;
                     const cred = await auth.createUserWithEmailAndPassword(email, pass);
                     
-                    const refCode = 'SQL' + Math.random().toString(36).substr(2, 6).toUpperCase();
+                    const refCode = 'ETF' + Math.random().toString(36).substr(2, 6).toUpperCase();
                     const referredBy = new URLSearchParams(window.location.search).get('ref') || '';
 
                     await db.collection('users').doc(cred.user.uid).set({
@@ -998,28 +1063,27 @@
                         refCount: 0, refEarned: 0,
                         upi: '', crypto: '', pfp: '',
                         role: 'operator',
-                        joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 } else {
                     const phone = document.getElementById('login-phone').value.trim();
                     const pass = document.getElementById('login-pass').value;
-                    const email = `${phone.replace(/\s+/g, '')}@sql-elite.com`;
+                    const email = `${phone.replace(/\D/g, '')}@etf-elite.com`;
                     await auth.signInWithEmailAndPassword(email, pass);
                 }
             } catch (e) {
-                alert("Terminal Error: " + e.message);
-            } finally {
+                alert("Error: " + e.message);
                 hideLoader();
             }
         }
 
         function handleLogout() {
-            auth.signOut().then(() => location.reload());
+            if(confirm('Logout from ETF Elite?')) {
+                auth.signOut().then(() => location.reload());
+            }
         }
 
-        // 3. TERMINAL INITIALIZATION PROTOCOL
         async function initializeTerminal() {
-            // Real-time Identity Sync
             db.collection('users').doc(State.user.uid).onSnapshot(doc => {
                 if (doc.exists) {
                     State.userData = doc.data();
@@ -1027,7 +1091,6 @@
                 }
             });
 
-            // Global Parameters Sync
             db.collection('admin').doc('config').onSnapshot(doc => {
                 if (doc.exists) {
                     State.admin = doc.data();
@@ -1035,19 +1098,15 @@
                 }
             });
 
-            // Initialize High-Frequency Market Feed
             await syncMarketData();
-            setInterval(syncMarketData, 15000); // Faster refresh for premium feel
+            setInterval(syncMarketData, 30000);
             
-            // Load Content Baskets
             syncTerminalContent();
             
-            // Activate App Shell
             showView('app');
             hideLoader();
 
-            // Set initial mobile nav active
-            document.querySelector('.mobile-nav-btn[data-page="home"]').classList.add('active');
+            document.querySelector('.mobile-nav-btn[data-page="home"]')?.classList.add('active');
         }
 
         function updateUserInterface() {
@@ -1062,73 +1121,61 @@
                 document.getElementById('prof-pfp').src = d.pfp;
             }
 
-            const format = (v) => '₹' + (v || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
-            document.getElementById('bal-total').innerText = format((d.balance || 0) + (d.totalInvested || 0));
+            const format = (v) => '₹' + (v || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const total = (d.balance || 0) + (d.totalInvested || 0);
+            
+            document.getElementById('bal-total').innerText = format(total);
             document.getElementById('bal-invested').innerText = format(d.totalInvested || 0);
             document.getElementById('bal-profit').innerText = format(d.profit || 0);
-            document.getElementById('wallet-total-val').innerText = format((d.balance || 0) + (d.totalInvested || 0));
+            document.getElementById('wallet-total-val').innerText = format(total);
             document.getElementById('wd-max').innerText = format(d.balance || 0);
 
             document.getElementById('prof-upi').value = d.upi || '';
             document.getElementById('prof-crypto').value = d.crypto || '';
             document.getElementById('wd-dest').innerText = d.upi || d.crypto || 'Not Configured';
 
-            // Referral Network Data
             document.getElementById('ref-count').innerText = d.refCount || 0;
             document.getElementById('ref-earned').innerText = format(d.refEarned || 0);
-            document.getElementById('ref-link-input').value = `${window.location.origin}?ref=${d.referralCode || 'SQLXXXXXX'}`;
+            document.getElementById('ref-link-input').value = `${window.location.origin}?ref=${d.referralCode || 'ETFXXXXXX'}`;
 
             loadTransactionLogs();
         }
 
         function applyGlobalConfig() {
             const a = State.admin || {};
-            if (a.siteName) {
-                document.title = a.siteName + " | Elite Terminal";
+            if (a.siteName) document.title = a.siteName;
+            
+            document.getElementById('disp-adm-upi').innerText = a.upi || 'admin@upi';
+            document.getElementById('disp-adm-btc').innerText = a.btc || 'Not Set';
+            document.getElementById('disp-adm-eth').innerText = a.eth || 'Not Set';
+            
+            if (a.upi) {
+                document.getElementById('upi-link').href = `upi://pay?pa=${a.upi}&pn=ETF%20ELITE&cu=INR`;
             }
-            if (a.pColor) document.documentElement.style.setProperty('--primary', a.pColor);
-            if (a.sColor) document.documentElement.style.setProperty('--secondary', a.sColor);
 
-            document.getElementById('disp-adm-upi').innerText = a.upi || 'OFFLINE';
-            document.getElementById('disp-adm-btc').innerText = a.btc || 'OFFLINE';
-            document.getElementById('disp-adm-eth').innerText = a.eth || 'OFFLINE';
-            document.getElementById('upi-link').href = `upi://pay?pa=${a.upi || ''}&pn=SQL%20ELITE&cu=INR`;
-
-            // Support Infrastructure
             const supBox = document.getElementById('support-line-container');
             supBox.innerHTML = '';
-            (a.support || ["+91 00000 00000"]).forEach(num => {
-                const wa = `https://wa.me/${num.replace(/\D/g,'')}?text=${encodeURIComponent('ETF WEBSITE से आया है: I need institutional support.')}`;
+            (a.support || ["+91 98765 43210"]).forEach(num => {
+                const wa = `https://wa.me/${num.replace(/\D/g,'')}?text=Hi%20ETF%20Support`;
                 supBox.innerHTML += `
-                    <a href="${wa}" target="_blank" class="glass-card p-8 rounded-3xl flex items-center justify-between group hover:border-primary/40 transition-all">
-                        <div class="flex items-center gap-6">
-                            <i class="fab fa-whatsapp text-4xl text-primary"></i>
-                            <div class="text-left">
-                                <h4 class="font-black text-lg">Support Manager</h4>
-                                <p class="text-gray-500 font-mono font-bold">${num}</p>
-                            </div>
+                    <a href="${wa}" target="_blank" class="list-item group">
+                        <div class="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center mr-3 border border-green-500/20">
+                            <i class="fab fa-whatsapp text-green-500"></i>
                         </div>
-                        <i class="fas fa-chevron-right text-gray-700 group-hover:text-primary transition-all"></i>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-sm">Support Manager</h4>
+                            <p class="text-gray-500 text-xs font-mono">${num}</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-600 group-hover:text-primary transition-all text-sm"></i>
                     </a>
                 `;
             });
         }
 
-        // 4. MARKET TERMINAL ENGINE (1000+ COINS) - POLISHED + FASTER
         async function syncMarketData() {
-            const tbody = document.getElementById('market-list-body');
-            if (!State.marketLoaded) {
-                tbody.innerHTML = `
-                    <tr><td colspan="5" class="p-12 text-center">
-                        <div class="skeleton h-8 w-3/4 mx-auto rounded mb-4"></div>
-                        <div class="skeleton h-8 w-3/4 mx-auto rounded"></div>
-                    </td></tr>
-                `;
-            }
             try {
-                const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&sparkline=true&price_change_percentage=24h');
+                const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&sparkline=true&price_change_percentage=24h');
                 State.market = await res.json();
-                State.marketLoaded = true;
                 renderMarketTerminal();
                 updateMarketSidebar();
                 
@@ -1136,54 +1183,62 @@
                     document.getElementById('market-price-ticker').innerText = '$' + State.market[0].current_price.toLocaleString();
                 }
             } catch (e) {
-                console.error("Market Feed Latency Detected.");
-                tbody.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-gray-500">Market feed temporarily unavailable. Retrying...</td></tr>`;
+                console.error("Market sync failed");
             }
         }
 
         function renderMarketTerminal() {
-            const tbody = document.getElementById('market-list-body');
+            const container = document.getElementById('market-list-container');
             const search = (document.getElementById('market-search').value || '').toLowerCase();
-            tbody.innerHTML = '';
+            container.innerHTML = '';
 
-            const filtered = State.market.filter(c => 
-                (c.name || '').toLowerCase().includes(search) || 
-                (c.symbol || '').toLowerCase().includes(search)
+            let filtered = State.market.filter(c => 
+                c.name.toLowerCase().includes(search) || 
+                c.symbol.toLowerCase().includes(search)
             );
+
+            if (State.marketFilter === 'gainers') filtered = filtered.filter(c => c.price_change_percentage_24h > 0).sort((a,b) => b.price_change_percentage_24h - a.price_change_percentage_24h);
+            if (State.marketFilter === 'losers') filtered = filtered.filter(c => c.price_change_percentage_24h < 0).sort((a,b) => a.price_change_percentage_24h - b.price_change_percentage_24h);
+            if (State.marketFilter === 'volume') filtered = filtered.sort((a,b) => b.total_volume - a.total_volume);
             
             filtered.slice(0, (State.currentPage + 1) * State.coinsPerPage).forEach(coin => {
-                const tr = document.createElement('tr');
-                tr.className = 'market-row cursor-pointer border-b border-white/5 hover:bg-white/5';
-                tr.onclick = () => openAssetTerminal(coin);
-                
                 const change = coin.price_change_percentage_24h || 0;
+                const isPositive = change >= 0;
                 
-                tr.innerHTML = `
-                    <td class="p-6 lg:p-8">
-                        <div class="flex items-center gap-5">
-                            <img src="${coin.image}" class="w-10 h-10 rounded-full border border-white/10">
-                            <div>
-                                <p class="font-black text-lg tracking-tight">${coin.name}</p>
-                                <p class="text-[11px] text-gray-500 font-mono font-bold uppercase tracking-widest">${coin.symbol}</p>
-                            </div>
+                const div = document.createElement('div');
+                div.className = 'list-item cursor-pointer';
+                div.onclick = () => openAssetTerminal(coin);
+                
+                div.innerHTML = `
+                    <img src="${coin.image}" class="w-10 h-10 rounded-full mr-3 border border-white/10">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <h4 class="font-bold text-sm truncate">${coin.name}</h4>
+                            <span class="font-mono font-bold text-sm">$${coin.current_price.toLocaleString()}</span>
                         </div>
-                    </td>
-                    <td class="p-6 lg:p-8 font-mono font-black text-lg">$${coin.current_price.toLocaleString()}</td>
-                    <td class="p-6 lg:p-8">
-                        <span class="px-4 py-2 rounded-xl text-[11px] font-black tracking-widest ${change >= 0 ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-danger/10 text-danger border border-danger/20'}">
-                            ${change >= 0 ? '+' : ''}${change.toFixed(2)}%
-                        </span>
-                    </td>
-                    <td class="p-6 lg:p-8 text-gray-500 font-mono font-bold text-sm">$${(coin.market_cap / 1e9).toFixed(2)}B</td>
-                    <td class="p-6 lg:p-8 text-right">
-                        <button class="bg-primary/10 text-primary border border-primary/20 px-6 py-3 rounded-2xl text-[11px] font-black hover:bg-primary hover:text-black transition-all tracking-widest">TRADE</button>
-                    </td>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] text-gray-500 uppercase tracking-wider">${coin.symbol}</span>
+                            <span class="text-xs font-bold ${isPositive ? 'price-up' : 'price-down'}">
+                                ${isPositive ? '+' : ''}${change.toFixed(2)}%
+                            </span>
+                        </div>
+                    </div>
                 `;
-                tbody.appendChild(tr);
+                container.appendChild(div);
             });
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-gray-500">No assets found matching your search.</td></tr>`;
-            }
+        }
+
+        function filterMarket(type, el) {
+            State.marketFilter = type;
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            State.currentPage = 0;
+            renderMarketTerminal();
+        }
+
+        function refreshMarket() {
+            State.currentPage = 0;
+            syncMarketData();
         }
 
         function loadMoreCoins() {
@@ -1206,7 +1261,7 @@
             const change = coin.price_change_percentage_24h || 0;
             const el = document.getElementById('cm-change');
             el.innerText = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
-            el.className = change >= 0 ? 'text-primary font-black text-2xl' : 'text-danger font-black text-2xl';
+            el.className = change >= 0 ? 'text-primary text-sm font-bold' : 'text-danger text-sm font-bold';
 
             document.getElementById('cm-cap').innerText = '$' + (coin.market_cap / 1e9).toFixed(2) + 'B';
             document.getElementById('cm-vol').innerText = '$' + (coin.total_volume / 1e6).toFixed(2) + 'M';
@@ -1221,38 +1276,40 @@
             const ctx = document.getElementById('cm-chart').getContext('2d');
             if (State.chart) State.chart.destroy();
 
-            const spark = coin.sparkline_in_7d.price;
-            const labels = spark.map((_, i) => i);
+            const prices = coin.sparkline_in_7d?.price || [];
+            const labels = prices.map((_, i) => i);
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(0, 255, 136, 0.2)');
+            gradient.addColorStop(1, 'rgba(0, 255, 136, 0)');
 
             State.chart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
-                        data: spark,
+                        data: prices,
                         borderColor: '#00ff88',
-                        borderWidth: 3,
+                        backgroundColor: gradient,
+                        borderWidth: 2,
                         pointRadius: 0,
-                        tension: 0.4,
+                        pointHoverRadius: 4,
                         fill: true,
-                        backgroundColor: (context) => {
-                            const chart = context.chart;
-                            const {ctx, chartArea} = chart;
-                            if (!chartArea) return null;
-                            const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-                            gradient.addColorStop(0, 'rgba(0, 255, 136, 0)');
-                            gradient.addColorStop(1, 'rgba(0, 255, 136, 0.15)');
-                            return gradient;
-                        }
+                        tension: 0.4
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    interaction: { intersect: false, mode: 'index' },
+                    plugins: { legend: { display: false }, tooltip: { enabled: true } },
                     scales: {
                         x: { display: false },
-                        y: { display: false }
+                        y: { 
+                            display: true,
+                            grid: { color: 'rgba(255,255,255,0.03)' },
+                            ticks: { color: '#666', font: { size: 10 }, callback: (v) => '$' + v.toFixed(0) }
+                        }
                     }
                 }
             });
@@ -1263,282 +1320,313 @@
             trendBox.innerHTML = '';
             State.market.slice(0, 5).forEach(coin => {
                 trendBox.innerHTML += `
-                    <div class="flex items-center justify-between p-4 bg-black/30 rounded-2xl border border-white/5 group hover:border-primary/20 transition-all cursor-pointer" onclick="openAssetTerminal(${JSON.stringify(coin).replace(/"/g, '&quot;')})">
-                        <div class="flex items-center gap-4">
-                            <img src="${coin.image}" class="w-8 h-8 rounded-full">
-                            <span class="font-black text-sm tracking-widest">${coin.symbol.toUpperCase()}</span>
+                    <div class="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5 cursor-pointer hover:border-primary/20 transition-all" onclick='openAssetTerminal(${JSON.stringify(coin)})'>
+                        <div class="flex items-center gap-3">
+                            <img src="${coin.image}" class="w-8 h-8 rounded-full"><div>
+                                <h4 class="font-bold text-xs truncate w-16">${coin.symbol.toUpperCase()}</h4>
+                                <p class="text-[10px] text-gray-500 truncate w-16">${coin.name}</p>
+                            </div>
                         </div>
-                        <span class="text-primary font-mono text-sm font-black">$${coin.current_price.toLocaleString()}</span>
-                    </div>
-                `;
-            });
-
-            const newsBox = document.getElementById('market-news');
-            const mockIntel = [
-                { title: "Institutional Whale Movement Detected in BTC", time: "3m ago", type: "Alert" },
-                { title: "ETF Inflow Surges to Record High in Q1 2026", time: "18m ago", type: "Market" },
-                { title: "SQL Elite Liquidity Bridge Expansion Complete", time: "1h ago", type: "System" }
-            ];
-            newsBox.innerHTML = '';
-            mockIntel.forEach(n => {
-                newsBox.innerHTML += `
-                    <div class="border-l-4 border-primary/20 pl-5 group cursor-pointer">
-                        <span class="text-[10px] font-black text-primary uppercase tracking-[4px] mb-2 block">${n.type}</span>
-                        <h4 class="font-black text-lg mb-2 group-hover:text-primary transition-all">${n.title}</h4>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">${n.time}</p>
+                        <div class="text-right">
+                            <p class="font-mono text-xs font-bold">$${coin.current_price.toLocaleString()}</p>
+                            <p class="text-[10px] font-bold ${coin.price_change_percentage_24h >= 0 ? 'text-primary' : 'text-danger'}">
+                                ${coin.price_change_percentage_24h >= 0 ? '+' : ''}${(coin.price_change_percentage_24h || 0).toFixed(2)}%
+                            </p>
+                        </div>
                     </div>
                 `;
             });
         }
 
-        // 5. ASSET & CONTENT BASKETS
         function syncTerminalContent() {
-            const demoFeatured = [
-                { id: 'f1', type: 'featured', title: 'BTC Elite Vault', desc: 'High yield Bitcoin backed institutional portfolio.', img: 'https://picsum.photos/id/1015/800/600', roi: 28, min: 5000 },
-                { id: 'f2', type: 'featured', title: 'ETH Growth Fund', desc: 'Diversified Ethereum + Layer-2 staking basket.', img: 'https://picsum.photos/id/201/800/600', roi: 42, min: 10000 }
-            ];
-            const demoPlans = [
-                { id: 'p1', type: 'plan', title: 'Quantum ETF Basket', desc: 'AI + Quantum computing themed ETFs.', img: 'https://picsum.photos/id/237/800/600', roi: 19, min: 25000 },
-                { id: 'p2', type: 'plan', title: 'Green Energy Crypto', desc: 'Sustainable blockchain + renewable energy.', img: 'https://picsum.photos/id/870/800/600', roi: 35, min: 15000 }
+            const plans = State.admin?.plans || [
+                { id: 'p1', name: 'Alpha Tech ETF', yield: '12-15%', min: 5000, duration: '30 Days', risk: 'Low' },
+                { id: 'p2', name: 'Crypto Bluechip', yield: '25-30%', min: 15000, duration: '45 Days', risk: 'Medium' },
+                { id: 'p3', name: 'DeFi Yield Aggregator', yield: '40-50%', min: 50000, duration: '60 Days', risk: 'High' }
             ];
 
-            const featGrid = document.getElementById('featured-grid');
-            const planGrid = document.getElementById('invest-plans-grid');
-            featGrid.innerHTML = ''; planGrid.innerHTML = '';
+            const grid = document.getElementById('invest-plans-grid');
+            const featured = document.getElementById('featured-grid');
+            grid.innerHTML = '';
+            featured.innerHTML = '';
 
-            demoFeatured.forEach(c => featGrid.appendChild(createAssetCard(c)));
-            demoPlans.forEach(c => planGrid.appendChild(createAssetCard(c)));
-        }
-
-        function createAssetCard(c) {
-            const div = document.createElement('div');
-            div.className = 'glass-card rounded-[32px] overflow-hidden group hover:border-primary/40 transition-all duration-500';
-            div.innerHTML = `
-                <div class="h-60 overflow-hidden relative">
-                    <img src="${c.img}" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-1000">
-                    <div class="absolute top-6 left-6 bg-primary text-black px-5 py-2 rounded-full text-[11px] font-black tracking-[4px] uppercase neo-glow">${c.roi}% ROI</div>
-                </div>
-                <div class="p-10">
-                    <h3 class="text-2xl font-black mb-5 tracking-tight">${c.title}</h3>
-                    <p class="text-gray-500 text-sm font-medium mb-10 leading-relaxed">${c.desc}</p>
-                    <div class="grid grid-cols-2 gap-6 mb-10 bg-black/30 p-6 rounded-2xl border border-white/5">
-                        <div><p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Min Stake</p><p class="font-mono font-black text-primary text-xl">₹${c.min}</p></div>
-                        <div><p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Duration</p><p class="font-mono font-black text-primary text-xl">30 Days</p></div>
+            plans.forEach((p, index) => {
+                const cardHtml = `
+                    <div class="crypto-card p-6 card-hover">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="font-black text-lg text-white mb-1">${p.name}</h3>
+                                <span class="badge ${p.risk === 'Low' ? 'badge-primary' : p.risk === 'Medium' ? 'badge-secondary' : 'badge-danger'}">${p.risk} Risk</span>
+                            </div>
+                            <div class="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center border border-white/10">
+                                <i class="fas ${p.risk === 'Low' ? 'fa-shield-alt text-primary' : 'fa-rocket text-secondary'}"></i>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="bg-black/30 p-3 rounded-xl border border-white/5 text-center">
+                                <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Est. Yield</p>
+                                <p class="font-mono font-black text-primary text-sm">${p.yield}</p>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded-xl border border-white/5 text-center">
+                                <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Duration</p>
+                                <p class="font-mono font-black text-white text-sm">${p.duration}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between mb-4">
+                            <p class="text-xs text-gray-400">Min. Investment:</p>
+                            <p class="font-mono font-bold text-white">₹${p.min.toLocaleString()}</p>
+                        </div>
+                        <button onclick="investInPlan('${p.id}', ${p.min})" class="btn-primary w-full text-sm">Invest Now</button>
                     </div>
-                    <button onclick="openModal('deposit', ${c.min})" class="w-full bg-white/5 border border-primary/30 text-primary font-black py-5 rounded-2xl hover:bg-primary hover:text-black transition-all text-lg tracking-widest">INVEST NOW</button>
-                </div>
-            `;
-            return div;
-        }
-
-        // 6. SETTLEMENT & LIQUIDATION
-        async function submitDeposit() {
-            const amt = parseFloat(document.getElementById('dep-amt').value);
-            const ref = document.getElementById('dep-ref').value.trim();
-            if (!amt || !ref) return alert("All settlement fields are mandatory.");
-
-            try {
-                showLoader();
-                await db.collection('transactions').add({
-                    uid: State.user.uid,
-                    userName: State.userData.name,
-                    amount: amt,
-                    ref, type: 'deposit',
-                    method: State.payMethod,
-                    status: 'pending',
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                alert("Settlement Logged. Awaiting verification on the ledger.");
-                closeModal('deposit');
-            } catch (e) { alert("Bridge Error: " + e.message); }
-            finally { hideLoader(); }
-        }
-
-        async function submitWithdraw() {
-            const amt = parseFloat(document.getElementById('wd-amt').value);
-            if (!amt || amt > (State.userData.balance || 0)) return alert("Invalid liquidation value.");
-
-            try {
-                showLoader();
-                await db.collection('transactions').add({
-                    uid: State.user.uid,
-                    userName: State.userData.name,
-                    amount: amt,
-                    type: 'withdrawal',
-                    dest: State.userData.upi || State.userData.crypto,
-                    status: 'pending',
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                alert("Liquidation bridge initialized. Assets will be released shortly.");
-                closeModal('withdraw');
-            } catch (e) { alert("Bridge Error: " + e.message); }
-            finally { hideLoader(); }
-        }
-
-        function loadTransactionLogs() {
-            db.collection('transactions').where('uid', '==', State.user.uid).orderBy('timestamp', 'desc').limit(15).onSnapshot(snap => {
-                const homeList = document.getElementById('home-tx-list');
-                const walletList = document.getElementById('wallet-tx-body');
-                homeList.innerHTML = ''; walletList.innerHTML = '';
-
-                snap.forEach(doc => {
-                    const tx = doc.data();
-                    const date = tx.timestamp ? tx.timestamp.toDate().toLocaleString('en-IN') : 'Processing...';
-                    const row = `
-                        <tr class="border-b border-white/5 hover:bg-white/2 transition-all">
-                            <td class="py-6 font-mono text-xs text-gray-500">${date}</td>
-                            <td class="py-6 font-black uppercase text-xs tracking-widest">${tx.type}</td>
-                            <td class="py-6 font-mono font-black text-lg ${tx.type === 'deposit' ? 'text-primary' : 'text-danger'}">₹${tx.amount.toLocaleString()}</td>
-                            <td class="py-6 text-right"><span class="px-4 py-2 rounded-xl text-[10px] font-black tracking-[4px] bg-white/5 text-secondary border border-secondary/20">${tx.status.toUpperCase()}</span></td>
-                        </tr>
-                    `;
-                    homeList.innerHTML += row;
-                    walletList.innerHTML += row;
-                });
+                `;
+                grid.innerHTML += cardHtml;
+                if (index < 2) featured.innerHTML += cardHtml;
             });
         }
 
-        // 7. UTILITY & NAVIGATION MODULES (POLISHED FOR PERFECT MOBILE + DESKTOP SYNC)
-        function switchPage(pageId, el = null) {
+        async function loadTransactionLogs() {
+            if (!State.user) return;
+            const txList = document.getElementById('home-tx-list');
+            const walletTx = document.getElementById('wallet-pane-tx');
+            
+            db.collection('transactions').where('uid', '==', State.user.uid)
+              .orderBy('createdAt', 'desc').limit(10)
+              .onSnapshot(snap => {
+                  let html = '';
+                  if (snap.empty) {
+                      html = '<p class="text-center text-gray-500 text-xs py-4">No recent transactions</p>';
+                  } else {
+                      snap.forEach(doc => {
+                          const tx = doc.data();
+                          const isPos = tx.type === 'deposit' || tx.type === 'profit';
+                          const date = tx.createdAt ? tx.createdAt.toDate().toLocaleDateString() : 'Pending';
+                          const statusColor = tx.status === 'approved' ? 'text-primary' : tx.status === 'rejected' ? 'text-danger' : 'text-warning';
+                          
+                          html += `
+                              <div class="list-item">
+                                  <div class="w-10 h-10 rounded-full ${isPos ? 'bg-primary/10 border-primary/20 text-primary' : 'bg-danger/10 border-danger/20 text-danger'} flex items-center justify-center mr-3 border">
+                                      <i class="fas ${isPos ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+                                  </div>
+                                  <div class="flex-1">
+                                      <h4 class="font-bold text-sm capitalize">${tx.type}</h4>
+                                      <p class="text-[10px] text-gray-500">${date} • <span class="${statusColor} uppercase tracking-wider font-bold">${tx.status}</span></p>
+                                  </div>
+                                  <div class="text-right">
+                                      <p class="font-mono font-bold text-sm ${isPos ? 'text-primary' : 'text-danger'}">${isPos ? '+' : '-'}₹${tx.amount.toLocaleString()}</p>
+                                  </div>
+                              </div>
+                          `;
+                      });
+                  }
+                  txList.innerHTML = html;
+                  walletTx.innerHTML = html;
+              });
+        }
+
+        // --- Navigation & UI ---
+        function switchPage(page, btnEl = null) {
             document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
-            const targetView = document.getElementById('view-' + pageId);
-            if (targetView) targetView.classList.add('active');
-
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            if (el && el.classList.contains('nav-link')) {
-                el.classList.add('active');
+            document.getElementById(`view-${page}`).classList.add('active');
+            
+            document.querySelectorAll('.nav-link, .mobile-nav-btn').forEach(b => b.classList.remove('active'));
+            if (btnEl) {
+                btnEl.classList.add('active');
+            } else {
+                const deskBtn = document.querySelector(`.nav-link[onclick*="switchPage('${page}'"]`);
+                const mobBtn = document.querySelector(`.mobile-nav-btn[data-page="${page}"]`);
+                if(deskBtn) deskBtn.classList.add('active');
+                if(mobBtn) mobBtn.classList.add('active');
             }
-
-            document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
-            const mobileBtn = document.querySelector(`.mobile-nav-btn[data-page="${pageId}"]`);
-            if (mobileBtn) mobileBtn.classList.add('active');
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo(0,0);
         }
 
         function switchWalletTab(tab, el) {
             document.querySelectorAll('.wallet-tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
-
             document.getElementById('wallet-pane-tx').classList.add('hidden');
             document.getElementById('wallet-pane-holdings').classList.add('hidden');
+            document.getElementById('wallet-pane-etf').classList.add('hidden');
+            document.getElementById(`wallet-pane-${tab}`).classList.remove('hidden');
+        }
 
-            if (tab === 'tx') {
-                document.getElementById('wallet-pane-tx').classList.remove('hidden');
-            } else if (tab === 'holdings') {
-                const holdingsDiv = document.getElementById('wallet-pane-holdings');
-                holdingsDiv.classList.remove('hidden');
-                holdingsDiv.innerHTML = `
-                    <div class="glass-card p-8 rounded-3xl text-center">
-                        <p class="text-gray-400">Demo Holdings: BTC ₹45,000 | ETH ₹28,000 | USDT ₹12,000</p>
-                    </div>
-                `;
-            } else if (tab === 'etf') {
-                const holdingsDiv = document.getElementById('wallet-pane-holdings');
-                holdingsDiv.classList.remove('hidden');
-                holdingsDiv.innerHTML = `
-                    <div class="glass-card p-8 rounded-3xl text-center">
-                        <p class="text-gray-400">ETF Portfolios: Quantum Basket ₹1,25,000 | Green Energy ₹75,000</p>
-                    </div>
-                `;
+        function showView(view) {
+            document.getElementById('auth-view').classList.add('hidden');
+            document.getElementById('app-shell').classList.add('hidden');
+            if(view === 'auth') document.getElementById('auth-view').classList.remove('hidden');
+            if(view === 'app') document.getElementById('app-shell').classList.remove('hidden');
+        }
+
+        function showLoader() { document.getElementById('master-loader').classList.remove('hidden'); }
+        function hideLoader() { document.getElementById('master-loader').classList.add('hidden'); }
+
+        function openModal(id) { 
+            document.getElementById(`modal-${id}`).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal(id) { 
+            document.getElementById(`modal-${id}`).classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // --- Deposits & Withdrawals ---
+        function switchPay(method) {
+            State.payMethod = method;
+            document.getElementById('pane-upi').classList.toggle('hidden', method !== 'upi');
+            document.getElementById('pane-crypto').classList.toggle('hidden', method !== 'crypto');
+            
+            document.getElementById('pay-btn-upi').className = method === 'upi' ? 'flex-1 p-4 rounded-xl bg-surface border-2 border-primary/20 text-center' : 'flex-1 p-4 rounded-xl bg-surface border-2 border-white/5 text-center';
+            document.getElementById('pay-btn-crypto').className = method === 'crypto' ? 'flex-1 p-4 rounded-xl bg-surface border-2 border-primary/20 text-center' : 'flex-1 p-4 rounded-xl bg-surface border-2 border-white/5 text-center';
+        }
+
+        function setDep(amt) { document.getElementById('dep-amt').value = amt; }
+
+        async function submitDeposit() {
+            const amt = Number(document.getElementById('dep-amt').value);
+            const ref = document.getElementById('dep-ref').value.trim();
+            
+            if (amt < 500) return alert("Minimum deposit is ₹500");
+            if (!ref) return alert("Please enter Transaction Reference");
+
+            showLoader();
+            try {
+                await db.collection('transactions').add({
+                    uid: State.user.uid,
+                    userName: State.userData.name,
+                    type: 'deposit',
+                    amount: amt,
+                    method: State.payMethod,
+                    reference: ref,
+                    status: 'pending',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert("Deposit request submitted! It will be verified shortly.");
+                closeModal('deposit');
+                document.getElementById('dep-amt').value = '';
+                document.getElementById('dep-ref').value = '';
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
+            hideLoader();
+        }
+
+        async function submitWithdraw() {
+            const amt = Number(document.getElementById('wd-amt').value);
+            const bal = State.userData.balance || 0;
+            
+            if (amt < 500) return alert("Minimum withdrawal is ₹500");
+            if (amt > bal) return alert("Insufficient Balance!");
+            if (!State.userData.upi && !State.userData.crypto) return alert("Please configure payment details in Profile first.");
+
+            showLoader();
+            try {
+                await db.collection('transactions').add({
+                    uid: State.user.uid,
+                    userName: State.userData.name,
+                    type: 'withdraw',
+                    amount: amt,
+                    status: 'pending',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                await db.collection('users').doc(State.user.uid).update({
+                    balance: firebase.firestore.FieldValue.increment(-amt)
+                });
+                
+                alert("Withdrawal requested successfully!");
+                closeModal('withdraw');
+                document.getElementById('wd-amt').value = '';
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
+            hideLoader();
+        }
+
+        async function investInPlan(planId, minAmt) {
+            const bal = State.userData.balance || 0;
+            if (bal < minAmt) {
+                alert(`Insufficient Balance. You need at least ₹${minAmt.toLocaleString()} to invest.`);
+                return openModal('deposit');
+            }
+            if(confirm(`Confirm investment of ₹${minAmt.toLocaleString()}?`)) {
+                showLoader();
+                try {
+                    await db.collection('investments').add({
+                        uid: State.user.uid,
+                        planId: planId,
+                        amount: minAmt,
+                        status: 'active',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    await db.collection('users').doc(State.user.uid).update({
+                        balance: firebase.firestore.FieldValue.increment(-minAmt),
+                        totalInvested: firebase.firestore.FieldValue.increment(minAmt)
+                    });
+                    alert("Investment Successful!");
+                    switchPage('wallet');
+                    switchWalletTab('etf', document.querySelectorAll('.wallet-tab')[2]);
+                } catch(e) {
+                    alert("Error: " + e.message);
+                }
+                hideLoader();
             }
         }
 
-        function openModal(id, val = null) {
-            if (val !== null) document.getElementById('dep-amt').value = val;
-            document.getElementById('modal-' + id).classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
+        function executeOrder() {
+            const amt = document.getElementById('cm-buy-amt').value;
+            if(!amt || amt <= 0) return alert("Enter valid amount");
+            alert("This feature requires completing Tier 2 KYC. Please contact Support.");
         }
 
-        function closeModal(id) {
-            document.getElementById('modal-' + id).classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-
-        function showLoader() { 
-            document.getElementById('master-loader').classList.remove('hidden'); 
-        }
-        function hideLoader() { 
-            document.getElementById('master-loader').classList.add('hidden'); 
-        }
-
-        function showView(v) {
-            document.getElementById('auth-view').classList.toggle('hidden', v !== 'auth');
-            document.getElementById('app-shell').classList.toggle('hidden', v !== 'app');
-        }
-
-        function setDep(v) { 
-            document.getElementById('dep-amt').value = v; 
-        }
-
-        function switchPay(opt) {
-            State.payMethod = opt;
-            document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('active', 'border-primary/20'));
-            document.getElementById('pay-btn-' + opt).classList.add('active', 'border-primary/20');
-            document.getElementById('pane-upi').classList.toggle('hidden', opt !== 'upi');
-            document.getElementById('pane-crypto').classList.toggle('hidden', opt !== 'crypto');
-        }
-
+        // --- Profile & Settings ---
         async function saveProfileSettings() {
             const upi = document.getElementById('prof-upi').value.trim();
             const crypto = document.getElementById('prof-crypto').value.trim();
+            showLoader();
             try {
-                showLoader();
                 await db.collection('users').doc(State.user.uid).update({ upi, crypto });
-                alert("Terminal Identity Updated.");
-            } catch (e) { alert(e.message); }
-            finally { hideLoader(); }
+                alert("Payment details updated successfully!");
+            } catch(e) {
+                alert("Error: " + e.message);
+            }
+            hideLoader();
         }
 
         function handlePfpUpload(input) {
-            if (!input.files || !input.files[0]) return;
-            showLoader();
             const file = input.files[0];
+            if (!file) return;
             const reader = new FileReader();
-            reader.onload = async function(e) {
-                const url = e.target.result;
+            reader.onload = async (e) => {
+                const b64 = e.target.result;
                 try {
-                    await db.collection('users').doc(State.user.uid).update({ pfp: url });
-                    document.getElementById('prof-pfp').src = url;
-                    document.getElementById('user-pfp-side').src = url;
-                    alert('Profile Picture Updated Successfully!');
-                } catch (err) {
-                    alert('Upload Error: ' + err.message);
-                } finally {
-                    hideLoader();
+                    await db.collection('users').doc(State.user.uid).update({ pfp: b64 });
+                    document.getElementById('prof-pfp').src = b64;
+                    document.getElementById('user-pfp-side').src = b64;
+                } catch(err) {
+                    alert("Failed to upload image.");
                 }
             };
             reader.readAsDataURL(file);
         }
 
         function copyRefLink() {
-            const input = document.getElementById('ref-link-input');
-            input.select();
+            const link = document.getElementById('ref-link-input');
+            link.select();
             document.execCommand('copy');
-            alert("Elite Invite Link Copied to Clipboard.");
+            alert("Referral Link Copied!");
         }
 
         function shareRefWA() {
             const link = document.getElementById('ref-link-input').value;
-            const msg = `ETF ELITE TERMINAL: Access institutional grade investment portfolios. Join my network: ${link}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+            const text = encodeURIComponent(`Join ETF ELITE - Institutional Trading Platform. Sign up here: ${link}`);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
         }
 
-        function executeOrder() {
-            alert("Institutional Order Executed Successfully! (Demo)");
-            closeModal('crypto');
-        }
-
-        // Clock Update
+        // Global Timer logic
         setInterval(() => {
             const now = new Date();
-            document.getElementById('global-timer').innerText = now.toISOString().split('T')[1].split('.')[0] + " UTC";
+            document.getElementById('global-timer').innerText = now.toLocaleTimeString('en-US', { hour12: false });
         }, 1000);
 
-        // Initial call for demo wallet holdings (optional)
-        window.onload = () => {
-            // Pre-load ready
-        };
     </script>
 </body>
-    </html>
+</html>
