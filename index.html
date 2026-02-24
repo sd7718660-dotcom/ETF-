@@ -14,6 +14,7 @@
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -30,6 +31,7 @@
                         glass: 'rgba(255, 255, 255, 0.03)',
                         danger: '#ff4444',
                         warning: '#ffaa00',
+                        trade: '#2962FF'
                     },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'sans-serif'],
@@ -106,7 +108,7 @@
 
         .mobile-nav-btn {
             transition: all 0.2s ease;
-            padding: 8px 4px;
+            padding: 8px 2px;
             min-height: 56px;
             font-size: 10px;
             position: relative;
@@ -124,7 +126,7 @@
             background: var(--primary);
             border-radius: 0 0 4px 4px;
         }
-        .mobile-nav-btn i { font-size: 20px; margin-bottom: 4px; }
+        .mobile-nav-btn i { font-size: 18px; margin-bottom: 4px; }
 
         .market-row {
             transition: var(--trans);
@@ -200,6 +202,12 @@
             color: black !important;
         }
 
+        .trade-tab.active {
+            background: var(--trade) !important;
+            color: white !important;
+            border-color: var(--trade) !important;
+        }
+
         .btn-primary {
             background: var(--primary);
             color: #000;
@@ -249,6 +257,25 @@
         }
         .btn-danger:hover { background: #ff4444; color: #fff; }
 
+        .btn-trade {
+            background: var(--trade);
+            color: #fff;
+            font-weight: 800;
+            padding: 14px 24px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: var(--trans);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-trade:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(41,98,255,0.3); }
+
         .card-hover {
             transition: var(--trans);
         }
@@ -285,6 +312,7 @@
         .badge-primary { background: rgba(0,255,136,0.1); color: var(--primary); border: 1px solid rgba(0,255,136,0.2); }
         .badge-secondary { background: rgba(255,215,0,0.1); color: var(--secondary); border: 1px solid rgba(255,215,0,0.2); }
         .badge-danger { background: rgba(255,68,68,0.1); color: #ff4444; border: 1px solid rgba(255,68,68,0.2); }
+        .badge-trade { background: rgba(41,98,255,0.1); color: var(--trade); border: 1px solid rgba(41,98,255,0.2); }
 
         .crypto-card {
             background: linear-gradient(145deg, rgba(18,18,18,0.9) 0%, rgba(10,10,10,0.9) 100%);
@@ -307,6 +335,14 @@
             background: rgba(0,0,0,0.3);
             border-radius: 16px;
             padding: 16px;
+        }
+
+        .trading-chart-container {
+            height: 400px;
+            width: 100%;
+            background: rgba(0,0,0,0.5);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         @media (min-width: 1025px) {
@@ -433,6 +469,74 @@
             border-radius: 8px;
         }
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+        /* Side Menu Styles */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background: rgba(10,10,10,0.98);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255,255,255,0.1);
+            z-index: 1001;
+            transition: right 0.3s ease;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .side-menu.open { right: 0; }
+        .side-menu-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .side-menu-overlay.open { opacity: 1; visibility: visible; }
+
+        .order-book {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+        .order-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 8px;
+            margin: 2px 0;
+            border-radius: 4px;
+        }
+        .order-buy { background: rgba(0,255,136,0.1); color: var(--primary); }
+        .order-sell { background: rgba(255,68,68,0.1); color: #ff4444; }
+
+        .leverage-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 5px;
+            background: #333;
+            outline: none;
+        }
+        .leverage-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--trade);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(41,98,255,0.5);
+        }
+
+        .position-card {
+            background: rgba(41,98,255,0.05);
+            border: 1px solid rgba(41,98,255,0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
     </style>
 </head>
 <body class="font-sans">
@@ -462,7 +566,22 @@
                     <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Password</label>
                     <input type="password" id="login-pass" class="input-field" placeholder="••••••••">
                 </div>
-                <button onclick="handleAuth('login')" class="btn-primary w-full mt-6">Login</button>
+                
+                <div class="relative my-4">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-white/10"></div>
+                    </div>
+                    <div class="relative flex justify-center text-xs">
+                        <span class="px-2 bg-[#121212] text-gray-500">Or continue with</span>
+                    </div>
+                </div>
+
+                <button onclick="handleGoogleLogin()" class="w-full bg-white text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-100 transition-all">
+                    <i class="fab fa-google text-lg"></i>
+                    <span>Sign in with Google</span>
+                </button>
+
+                <button onclick="handleAuth('login')" class="btn-primary w-full mt-4">Login</button>
                 <p class="text-center text-gray-500 text-xs mt-6">New User? <span onclick="toggleAuth('reg')" class="text-primary font-bold cursor-pointer">Create Account</span></p>
             </div>
 
@@ -483,7 +602,22 @@
                     <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Confirm Password</label>
                     <input type="password" id="reg-confirm" class="input-field" placeholder="Confirm Password">
                 </div>
-                <button onclick="handleAuth('register')" class="btn-primary w-full mt-6">Register</button>
+                
+                <div class="relative my-4">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-white/10"></div>
+                    </div>
+                    <div class="relative flex justify-center text-xs">
+                        <span class="px-2 bg-[#121212] text-gray-500">Or continue with</span>
+                    </div>
+                </div>
+
+                <button onclick="handleGoogleLogin()" class="w-full bg-white text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-100 transition-all">
+                    <i class="fab fa-google text-lg"></i>
+                    <span>Sign up with Google</span>
+                </button>
+
+                <button onclick="handleAuth('register')" class="btn-primary w-full mt-4">Register</button>
                 <p class="text-center text-gray-500 text-xs mt-6">Already have account? <span onclick="toggleAuth('login')" class="text-primary font-bold cursor-pointer">Login</span></p>
             </div>
         </div>
@@ -506,6 +640,9 @@
                 </button>
                 <button onclick="switchPage('market', this)" class="nav-link w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all text-sm">
                     <i class="fas fa-chart-line w-5"></i><span>Markets</span>
+                </button>
+                <button onclick="switchPage('trade', this)" class="nav-link w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all text-sm">
+                    <i class="fas fa-exchange-alt w-5"></i><span>Trade</span>
                 </button>
                 <button onclick="switchPage('invest', this)" class="nav-link w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all text-sm">
                     <i class="fas fa-briefcase w-5"></i><span>Invest</span>
@@ -542,14 +679,14 @@
             <button onclick="switchPage('market')" class="mobile-nav-btn flex flex-col items-center text-gray-400" data-page="market">
                 <i class="fas fa-chart-line"></i><span class="text-[9px] font-bold uppercase tracking-wider mt-1">Market</span>
             </button>
+            <button onclick="switchPage('trade')" class="mobile-nav-btn flex flex-col items-center text-gray-400" data-page="trade">
+                <i class="fas fa-exchange-alt"></i><span class="text-[9px] font-bold uppercase tracking-wider mt-1">Trade</span>
+            </button>
             <button onclick="switchPage('invest')" class="mobile-nav-btn flex flex-col items-center text-gray-400" data-page="invest">
                 <i class="fas fa-briefcase"></i><span class="text-[9px] font-bold uppercase tracking-wider mt-1">Invest</span>
             </button>
             <button onclick="switchPage('wallet')" class="mobile-nav-btn flex flex-col items-center text-gray-400" data-page="wallet">
                 <i class="fas fa-wallet"></i><span class="text-[9px] font-bold uppercase tracking-wider mt-1">Wallet</span>
-            </button>
-            <button onclick="switchPage('profile')" class="mobile-nav-btn flex flex-col items-center text-gray-400" data-page="profile">
-                <i class="fas fa-user"></i><span class="text-[9px] font-bold uppercase tracking-wider mt-1">Profile</span>
             </button>
         </div>
 
@@ -564,11 +701,8 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button onclick="openModal('deposit')" class="btn-primary text-sm py-3 px-5">
-                        <i class="fas fa-plus"></i> Deposit
-                    </button>
-                    <button onclick="openModal('withdraw')" class="btn-danger text-sm py-3 px-5">
-                        <i class="fas fa-minus"></i> Withdraw
+                    <button onclick="toggleSideMenu()" class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white hover:bg-white/10 transition-all">
+                        <i class="fas fa-bars text-lg"></i>
                     </button>
                 </div>
             </div>
@@ -633,10 +767,6 @@
                             <h1 class="text-2xl font-black tracking-tight mb-1">Global <span class="text-primary">Markets</span></h1>
                             <p class="text-gray-500 text-xs">Real-time crypto data feeds</p>
                         </div>
-                        <div class="text-right">
-                            <div class="text-3xl font-black font-mono text-primary" id="market-price-ticker">$0.00</div>
-                            <p class="text-[10px] text-gray-500 uppercase tracking-wider">BTC/USD</p>
-                        </div>
                     </div>
                 </div>
 
@@ -673,6 +803,258 @@
                             <div class="w-full h-2 bg-black/40 rounded-full mt-4 overflow-hidden">
                                 <div class="h-full bg-gradient-to-r from-danger via-warning to-primary" style="width: 78%;"></div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-trade" class="page-view">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-black tracking-tight mb-2">Pro <span class="text-trade">Trading</span></h1>
+                    <p class="text-gray-500 text-sm">Spot, Margin & Futures Trading</p>
+                </div>
+
+                <div class="tab-bar mb-6">
+                    <button class="trade-tab tab-item active" onclick="switchTradeTab('spot', this)">
+                        <i class="fas fa-coins mr-2"></i>Spot
+                    </button>
+                    <button class="trade-tab tab-item" onclick="switchTradeTab('margin', this)">
+                        <i class="fas fa-layer-group mr-2"></i>Margin (1-10x)
+                    </button>
+                    <button class="trade-tab tab-item" onclick="switchTradeTab('futures', this)">
+                        <i class="fas fa-rocket mr-2"></i>Futures (1-100x)
+                    </button>
+                </div>
+
+                <!-- Spot Trading -->
+                <div id="trade-spot" class="trade-pane">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <div class="lg:col-span-2">
+                            <div class="crypto-card p-4 mb-4">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <img id="spot-coin-img" src="https://assets.coingecko.com/coins/images/1/small/bitcoin.png" class="w-8 h-8 rounded-full">
+                                        <div>
+                                            <h3 class="font-black text-lg" id="spot-pair">BTC/USDT</h3>
+                                            <p class="text-xs text-gray-500" id="spot-price">$0.00</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-xs text-gray-500">24h Change</p>
+                                        <p class="font-bold text-primary" id="spot-change">+0.00%</p>
+                                    </div>
+                                </div>
+                                <div id="spot-chart" class="trading-chart-container"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="crypto-card p-4">
+                                <div class="flex gap-2 mb-4">
+                                    <button onclick="setTradeSide('buy')" id="side-buy" class="flex-1 btn-primary bg-green-500 hover:bg-green-600 text-white">Buy</button>
+                                    <button onclick="setTradeSide('sell')" id="side-sell" class="flex-1 btn-danger bg-red-500 hover:bg-red-600">Sell</button>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Select Coin</label>
+                                    <select id="spot-coin-select" onchange="changeSpotCoin()" class="input-field text-sm">
+                                        <option value="bitcoin">Bitcoin (BTC)</option>
+                                        <option value="ethereum">Ethereum (ETH)</option>
+                                        <option value="binancecoin">BNB</option>
+                                        <option value="solana">Solana (SOL)</option>
+                                        <option value="ripple">XRP</option>
+                                        <option value="cardano">Cardano (ADA)</option>
+                                        <option value="dogecoin">Dogecoin (DOGE)</option>
+                                        <option value="polkadot">Polkadot (DOT)</option>
+                                        <option value="polygon">Polygon (MATIC)</option>
+                                        <option value="litecoin">Litecoin (LTC)</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Amount (USDT)</label>
+                                    <input type="number" id="spot-amount" class="input-field text-lg font-bold" placeholder="0.00" oninput="calculateSpotTotal()">
+                                    <div class="flex gap-2 mt-2">
+                                        <button onclick="setSpotAmount(25)" class="flex-1 bg-white/5 text-xs py-2 rounded hover:bg-white/10">25%</button>
+                                        <button onclick="setSpotAmount(50)" class="flex-1 bg-white/5 text-xs py-2 rounded hover:bg-white/10">50%</button>
+                                        <button onclick="setSpotAmount(75)" class="flex-1 bg-white/5 text-xs py-2 rounded hover:bg-white/10">75%</button>
+                                        <button onclick="setSpotAmount(100)" class="flex-1 bg-white/5 text-xs py-2 rounded hover:bg-white/10">100%</button>
+                                    </div>
+                                </div>
+
+                                <div class="bg-black/30 p-3 rounded-xl mb-4">
+                                    <div class="flex justify-between text-sm mb-2">
+                                        <span class="text-gray-500">Available</span>
+                                        <span class="font-mono font-bold" id="spot-available">₹0.00</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-500">Total</span>
+                                        <span class="font-mono font-bold text-primary" id="spot-total">₹0.00</span>
+                                    </div>
+                                </div>
+
+                                <button onclick="executeSpotTrade()" class="btn-trade w-full text-sm" id="spot-action-btn">Buy BTC</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="crypto-card p-4 mt-4">
+                        <h3 class="font-black text-sm mb-4 uppercase tracking-wider text-gray-400">Open Orders</h3>
+                        <div id="spot-orders" class="space-y-2">
+                            <p class="text-center text-gray-500 text-sm py-4">No open orders</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Margin Trading -->
+                <div id="trade-margin" class="trade-pane hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <div class="lg:col-span-2">
+                            <div class="crypto-card p-4 mb-4">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <img id="margin-coin-img" src="https://assets.coingecko.com/coins/images/1/small/bitcoin.png" class="w-8 h-8 rounded-full">
+                                        <div>
+                                            <h3 class="font-black text-lg" id="margin-pair">BTC/USDT</h3>
+                                            <p class="text-xs text-gray-500" id="margin-price">$0.00</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="badge badge-trade">Margin 10x</span>
+                                    </div>
+                                </div>
+                                <div id="margin-chart" class="trading-chart-container"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="crypto-card p-4">
+                                <div class="flex gap-2 mb-4">
+                                    <button onclick="setMarginSide('buy')" id="margin-side-buy" class="flex-1 btn-primary bg-green-500 hover:bg-green-600 text-white">Long</button>
+                                    <button onclick="setMarginSide('sell')" id="margin-side-sell" class="flex-1 btn-danger bg-red-500 hover:bg-red-600">Short</button>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Leverage (1x - 10x)</label>
+                                    <input type="range" id="margin-leverage" min="1" max="10" value="1" class="leverage-slider mb-2" oninput="updateMarginLeverage(this.value)">
+                                    <div class="text-center font-bold text-trade" id="margin-leverage-display">1x</div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Select Coin</label>
+                                    <select id="margin-coin-select" onchange="changeMarginCoin()" class="input-field text-sm">
+                                        <option value="bitcoin">Bitcoin (BTC)</option>
+                                        <option value="ethereum">Ethereum (ETH)</option>
+                                        <option value="binancecoin">BNB</option>
+                                        <option value="solana">Solana (SOL)</option>
+                                        <option value="ripple">XRP</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Margin Amount (USDT)</label>
+                                    <input type="number" id="margin-amount" class="input-field text-lg font-bold" placeholder="0.00" oninput="calculateMarginTotal()">
+                                </div>
+
+                                <div class="bg-black/30 p-3 rounded-xl mb-4">
+                                    <div class="flex justify-between text-sm mb-2">
+                                        <span class="text-gray-500">Position Size</span>
+                                        <span class="font-mono font-bold text-trade" id="margin-position">₹0.00</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm mb-2">
+                                        <span class="text-gray-500">Margin Required</span>
+                                        <span class="font-mono font-bold" id="margin-required">₹0.00</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-500">Liquidation Price</span>
+                                        <span class="font-mono font-bold text-danger" id="margin-liq">--</span>
+                                    </div>
+                                </div>
+
+                                <button onclick="executeMarginTrade()" class="btn-trade w-full text-sm" id="margin-action-btn">Open Long Position</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="crypto-card p-4 mt-4">
+                        <h3 class="font-black text-sm mb-4 uppercase tracking-wider text-gray-400">Margin Positions</h3>
+                        <div id="margin-positions" class="space-y-2">
+                            <p class="text-center text-gray-500 text-sm py-4">No active positions</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Futures Trading -->
+                <div id="trade-futures" class="trade-pane hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <div class="lg:col-span-2">
+                            <div class="crypto-card p-4 mb-4">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <img id="futures-coin-img" src="https://assets.coingecko.com/coins/images/1/small/bitcoin.png" class="w-8 h-8 rounded-full">
+                                        <div>
+                                            <h3 class="font-black text-lg" id="futures-pair">BTC/USDT Perp</h3>
+                                            <p class="text-xs text-gray-500" id="futures-price">$0.00</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="badge badge-trade">Futures 100x</span>
+                                    </div>
+                                </div>
+                                <div id="futures-chart" class="trading-chart-container"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="crypto-card p-4">
+                                <div class="flex gap-2 mb-4">
+                                    <button onclick="setFuturesSide('buy')" id="futures-side-buy" class="flex-1 btn-primary bg-green-500 hover:bg-green-600 text-white">Long</button>
+                                    <button onclick="setFuturesSide('sell')" id="futures-side-sell" class="flex-1 btn-danger bg-red-500 hover:bg-red-600">Short</button>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Leverage (1x - 100x)</label>
+                                    <input type="range" id="futures-leverage" min="1" max="100" value="1" class="leverage-slider mb-2" oninput="updateFuturesLeverage(this.value)">
+                                    <div class="text-center font-bold text-trade" id="futures-leverage-display">1x</div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Select Coin</label>
+                                    <select id="futures-coin-select" onchange="changeFuturesCoin()" class="input-field text-sm">
+                                        <option value="bitcoin">Bitcoin (BTC)</option>
+                                        <option value="ethereum">Ethereum (ETH)</option>
+                                        <option value="binancecoin">BNB</option>
+                                        <option value="solana">Solana (SOL)</option>
+                                        <option value="ripple">XRP</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Contract Size (USDT)</label>
+                                    <input type="number" id="futures-amount" class="input-field text-lg font-bold" placeholder="0.00" oninput="calculateFuturesTotal()">
+                                </div>
+
+                                <div class="bg-black/30 p-3 rounded-xl mb-4">
+                                    <div class="flex justify-between text-sm mb-2">
+                                        <span class="text-gray-500">Notional Value</span>
+                                        <span class="font-mono font-bold text-trade" id="futures-notional">₹0.00</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm mb-2">
+                                        <span class="text-gray-500">Margin Required</span>
+                                        <span class="font-mono font-bold" id="futures-margin">₹0.00</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-500">Est. Liquidation</span>
+                                        <span class="font-mono font-bold text-danger" id="futures-liq">--</span>
+                                    </div>
+                                </div>
+
+                                <button onclick="executeFuturesTrade()" class="btn-trade w-full text-sm" id="futures-action-btn">Open Long Contract</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="crypto-card p-4 mt-4">
+                        <h3 class="font-black text-sm mb-4 uppercase tracking-wider text-gray-400">Futures Positions</h3>
+                        <div id="futures-positions" class="space-y-2">
+                            <p class="text-center text-gray-500 text-sm py-4">No open contracts</p>
                         </div>
                     </div>
                 </div>
@@ -859,6 +1241,50 @@
         </main>
     </div>
 
+    <!-- Side Menu -->
+    <div id="side-menu-overlay" class="side-menu-overlay" onclick="toggleSideMenu()"></div>
+    <div id="side-menu" class="side-menu">
+        <div class="flex items-center justify-between mb-8">
+            <h3 class="text-xl font-black">Menu</h3>
+            <button onclick="toggleSideMenu()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <nav class="space-y-2">
+            <button onclick="switchPage('home'); toggleSideMenu()" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all text-sm">
+                <i class="fas fa-home w-5"></i><span>Dashboard</span>
+            </button>
+            <button onclick="switchPage('market'); toggleSideMenu()" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all text-sm">
+                <i class="fas fa-chart-line w-5"></i><span>Markets</span>
+            </button>
+            <button onclick="switchPage('trade'); toggleSideMenu()" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all text-sm">
+                <i class="fas fa-exchange-alt w-5"></i><span>Trade</span>
+            </button>
+            <button onclick="switchPage('invest'); toggleSideMenu()" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all text-sm">
+                <i class="fas fa-briefcase w-5"></i><span>Invest</span>
+            </button>
+            <button onclick="switchPage('wallet'); toggleSideMenu()" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all text-sm">
+                <i class="fas fa-wallet w-5"></i><span>Wallet</span>
+            </button>
+            <button onclick="switchPage('profile'); toggleSideMenu()" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all text-sm">
+                <i class="fas fa-user w-5"></i><span>Profile</span>
+            </button>
+            <button onclick="switchPage('referral'); toggleSideMenu()" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all text-sm">
+                <i class="fas fa-users w-5"></i><span>Network</span>
+            </button>
+            <button onclick="switchPage('support'); toggleSideMenu()" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all text-sm">
+                <i class="fas fa-headset w-5"></i><span>Support</span>
+            </button>
+        </nav>
+
+        <div class="mt-auto pt-6 border-t border-white/5 absolute bottom-0 left-0 right-0 p-6">
+            <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-danger hover:bg-danger/10 transition-all text-sm font-semibold">
+                <i class="fas fa-power-off w-5"></i><span>Logout</span>
+            </button>
+        </div>
+    </div>
+
     <div id="modal-deposit" class="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-xl flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="glass-card w-full max-w-lg p-6 rounded-t-3xl sm:rounded-3xl border-primary/20 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between mb-6">
@@ -1020,7 +1446,19 @@
             selectedCoin: null,
             chart: null,
             payMethod: 'upi',
-            marketFilter: 'all'
+            marketFilter: 'all',
+            tradeSide: 'buy',
+            marginSide: 'buy',
+            futuresSide: 'buy',
+            spotChart: null,
+            marginChart: null,
+            futuresChart: null,
+            spotCoin: 'bitcoin',
+            marginCoin: 'bitcoin',
+            futuresCoin: 'bitcoin',
+            spotPrice: 0,
+            marginPrice: 0,
+            futuresPrice: 0
         };
 
         auth.onAuthStateChanged(async (user) => {
@@ -1036,6 +1474,37 @@
         function toggleAuth(pane) {
             document.getElementById('login-pane').classList.toggle('hidden', pane !== 'login');
             document.getElementById('reg-pane').classList.toggle('hidden', pane !== 'reg');
+        }
+
+        async function handleGoogleLogin() {
+            showLoader();
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+                
+                const userRef = db.collection('users').doc(user.uid);
+                const doc = await userRef.get();
+                
+                if (!doc.exists) {
+                    const refCode = 'ETF' + Math.random().toString(36).substr(2, 6).toUpperCase();
+                    await userRef.set({
+                        uid: user.uid,
+                        name: user.displayName || 'User',
+                        phone: user.phoneNumber || '',
+                        email: user.email,
+                        balance: 0, profit: 0, loss: 0, totalInvested: 0,
+                        referralCode: refCode, referredBy: '',
+                        refCount: 0, refEarned: 0,
+                        upi: '', crypto: '', pfp: user.photoURL || '',
+                        role: 'operator',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            } catch (error) {
+                alert("Google Login Error: " + error.message);
+                hideLoader();
+            }
         }
 
         async function handleAuth(type) {
@@ -1102,6 +1571,7 @@
             setInterval(syncMarketData, 30000);
             
             syncTerminalContent();
+            initializeTradingCharts();
             
             showView('app');
             hideLoader();
@@ -1129,6 +1599,7 @@
             document.getElementById('bal-profit').innerText = format(d.profit || 0);
             document.getElementById('wallet-total-val').innerText = format(total);
             document.getElementById('wd-max').innerText = format(d.balance || 0);
+            document.getElementById('spot-available').innerText = format(d.balance || 0);
 
             document.getElementById('prof-upi').value = d.upi || '';
             document.getElementById('prof-crypto').value = d.crypto || '';
@@ -1139,6 +1610,7 @@
             document.getElementById('ref-link-input').value = `${window.location.origin}?ref=${d.referralCode || 'ETFXXXXXX'}`;
 
             loadTransactionLogs();
+            loadUserPositions();
         }
 
         function applyGlobalConfig() {
@@ -1178,9 +1650,15 @@
                 State.market = await res.json();
                 renderMarketTerminal();
                 updateMarketSidebar();
+                updateTradingPrices();
                 
                 if (State.market.length > 0) {
-                    document.getElementById('market-price-ticker').innerText = '$' + State.market[0].current_price.toLocaleString();
+                    const btc = State.market.find(c => c.id === 'bitcoin');
+                    if (btc) {
+                        State.spotPrice = btc.current_price;
+                        State.marginPrice = btc.current_price;
+                        State.futuresPrice = btc.current_price;
+                    }
                 }
             } catch (e) {
                 console.error("Market sync failed");
@@ -1423,6 +1901,424 @@
               });
         }
 
+        // Trading Functions
+        function initializeTradingCharts() {
+            // Spot Chart
+            const spotContainer = document.getElementById('spot-chart');
+            State.spotChart = LightweightCharts.createChart(spotContainer, {
+                layout: { background: { color: 'transparent' }, textColor: '#d1d4dc' },
+                grid: { vertLines: { color: 'rgba(255,255,255,0.05)' }, horzLines: { color: 'rgba(255,255,255,0.05)' } },
+                crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+                rightPriceScale: { borderColor: 'rgba(255,255,255,0.1)' },
+                timeScale: { borderColor: 'rgba(255,255,255,0.1)' }
+            });
+            
+            const spotSeries = State.spotChart.addCandlestickSeries({
+                upColor: '#00ff88', downColor: '#ff4444', borderUpColor: '#00ff88', borderDownColor: '#ff4444', wickUpColor: '#00ff88', wickDownColor: '#ff4444'
+            });
+            State.spotSeries = spotSeries;
+            generateCandleData(spotSeries);
+
+            // Margin Chart
+            const marginContainer = document.getElementById('margin-chart');
+            State.marginChart = LightweightCharts.createChart(marginContainer, {
+                layout: { background: { color: 'transparent' }, textColor: '#d1d4dc' },
+                grid: { vertLines: { color: 'rgba(255,255,255,0.05)' }, horzLines: { color: 'rgba(255,255,255,0.05)' } },
+                rightPriceScale: { borderColor: 'rgba(255,255,255,0.1)' },
+                timeScale: { borderColor: 'rgba(255,255,255,0.1)' }
+            });
+            
+            const marginSeries = State.marginChart.addCandlestickSeries({
+                upColor: '#00ff88', downColor: '#ff4444', borderUpColor: '#00ff88', borderDownColor: '#ff4444'
+            });
+            State.marginSeries = marginSeries;
+            generateCandleData(marginSeries);
+
+            // Futures Chart
+            const futuresContainer = document.getElementById('futures-chart');
+            State.futuresChart = LightweightCharts.createChart(futuresContainer, {
+                layout: { background: { color: 'transparent' }, textColor: '#d1d4dc' },
+                grid: { vertLines: { color: 'rgba(255,255,255,0.05)' }, horzLines: { color: 'rgba(255,255,255,0.05)' } },
+                rightPriceScale: { borderColor: 'rgba(255,255,255,0.1)' },
+                timeScale: { borderColor: 'rgba(255,255,255,0.1)' }
+            });
+            
+            const futuresSeries = State.futuresChart.addCandlestickSeries({
+                upColor: '#00ff88', downColor: '#ff4444', borderUpColor: '#00ff88', borderDownColor: '#ff4444'
+            });
+            State.futuresSeries = futuresSeries;
+            generateCandleData(futuresSeries);
+
+            window.addEventListener('resize', () => {
+                State.spotChart.applyOptions({ width: spotContainer.clientWidth });
+                State.marginChart.applyOptions({ width: marginContainer.clientWidth });
+                State.futuresChart.applyOptions({ width: futuresContainer.clientWidth });
+            });
+        }
+
+        function generateCandleData(series) {
+            const data = [];
+            let time = new Date(Date.now() - 100 * 86400000);
+            let price = 45000;
+            
+            for (let i = 0; i < 100; i++) {
+                const open = price;
+                const close = price + (Math.random() - 0.5) * 1000;
+                const high = Math.max(open, close) + Math.random() * 500;
+                const low = Math.min(open, close) - Math.random() * 500;
+                
+                data.push({
+                    time: time.toISOString().split('T')[0],
+                    open: open,
+                    high: high,
+                    low: low,
+                    close: close
+                });
+                
+                price = close;
+                time = new Date(time.getTime() + 86400000);
+            }
+            
+            series.setData(data);
+        }
+
+        function switchTradeTab(tab, el) {
+            document.querySelectorAll('.trade-pane').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`trade-${tab}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.trade-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            
+            setTimeout(() => {
+                State.spotChart && State.spotChart.timeScale().fitContent();
+                State.marginChart && State.marginChart.timeScale().fitContent();
+                State.futuresChart && State.futuresChart.timeScale().fitContent();
+            }, 100);
+        }
+
+        function updateTradingPrices() {
+            const coins = {
+                'bitcoin': State.market.find(c => c.id === 'bitcoin'),
+                'ethereum': State.market.find(c => c.id === 'ethereum'),
+                'binancecoin': State.market.find(c => c.id === 'binancecoin'),
+                'solana': State.market.find(c => c.id === 'solana'),
+                'ripple': State.market.find(c => c.id === 'ripple'),
+                'cardano': State.market.find(c => c.id === 'cardano'),
+                'dogecoin': State.market.find(c => c.id === 'dogecoin'),
+                'polkadot': State.market.find(c => c.id === 'polkadot'),
+                'polygon': State.market.find(c => c.id === 'matic-network'),
+                'litecoin': State.market.find(c => c.id === 'litecoin')
+            };
+
+            // Update Spot
+            const spotCoin = coins[State.spotCoin];
+            if (spotCoin) {
+                document.getElementById('spot-pair').innerText = `${spotCoin.symbol.toUpperCase()}/USDT`;
+                document.getElementById('spot-price').innerText = `$${spotCoin.current_price.toLocaleString()}`;
+                document.getElementById('spot-change').innerText = `${spotCoin.price_change_percentage_24h >= 0 ? '+' : ''}${spotCoin.price_change_percentage_24h.toFixed(2)}%`;
+                document.getElementById('spot-change').className = `font-bold ${spotCoin.price_change_percentage_24h >= 0 ? 'text-primary' : 'text-danger'}`;
+                document.getElementById('spot-coin-img').src = spotCoin.image;
+                State.spotPrice = spotCoin.current_price;
+            }
+
+            // Update Margin
+            const marginCoin = coins[State.marginCoin];
+            if (marginCoin) {
+                document.getElementById('margin-pair').innerText = `${marginCoin.symbol.toUpperCase()}/USDT`;
+                document.getElementById('margin-price').innerText = `$${marginCoin.current_price.toLocaleString()}`;
+                document.getElementById('margin-coin-img').src = marginCoin.image;
+                State.marginPrice = marginCoin.current_price;
+            }
+
+            // Update Futures
+            const futuresCoin = coins[State.futuresCoin];
+            if (futuresCoin) {
+                document.getElementById('futures-pair').innerText = `${futuresCoin.symbol.toUpperCase()}/USDT Perp`;
+                document.getElementById('futures-price').innerText = `$${futuresCoin.current_price.toLocaleString()}`;
+                document.getElementById('futures-coin-img').src = futuresCoin.image;
+                State.futuresPrice = futuresCoin.current_price;
+            }
+        }
+
+        function changeSpotCoin() {
+            State.spotCoin = document.getElementById('spot-coin-select').value;
+            updateTradingPrices();
+            generateCandleData(State.spotSeries);
+        }
+
+        function changeMarginCoin() {
+            State.marginCoin = document.getElementById('margin-coin-select').value;
+            updateTradingPrices();
+            generateCandleData(State.marginSeries);
+            calculateMarginTotal();
+        }
+
+        function changeFuturesCoin() {
+            State.futuresCoin = document.getElementById('futures-coin-select').value;
+            updateTradingPrices();
+            generateCandleData(State.futuresSeries);
+            calculateFuturesTotal();
+        }
+
+        function setTradeSide(side) {
+            State.tradeSide = side;
+            document.getElementById('side-buy').className = side === 'buy' ? 'flex-1 btn-primary bg-green-500 hover:bg-green-600 text-white' : 'flex-1 btn-secondary';
+            document.getElementById('side-sell').className = side === 'sell' ? 'flex-1 btn-danger bg-red-500 hover:bg-red-600 text-white' : 'flex-1 btn-secondary';
+            
+            const coin = document.getElementById('spot-coin-select').options[document.getElementById('spot-coin-select').selectedIndex].text.split('(')[0].trim();
+            document.getElementById('spot-action-btn').innerText = side === 'buy' ? `Buy ${coin}` : `Sell ${coin}`;
+        }
+
+        function setMarginSide(side) {
+            State.marginSide = side;
+            document.getElementById('margin-side-buy').className = side === 'buy' ? 'flex-1 btn-primary bg-green-500 hover:bg-green-600 text-white' : 'flex-1 btn-secondary';
+            document.getElementById('margin-side-sell').className = side === 'sell' ? 'flex-1 btn-danger bg-red-500 hover:bg-red-600 text-white' : 'flex-1 btn-secondary';
+            document.getElementById('margin-action-btn').innerText = side === 'buy' ? 'Open Long Position' : 'Open Short Position';
+        }
+
+        function setFuturesSide(side) {
+            State.futuresSide = side;
+            document.getElementById('futures-side-buy').className = side === 'buy' ? 'flex-1 btn-primary bg-green-500 hover:bg-green-600 text-white' : 'flex-1 btn-secondary';
+            document.getElementById('futures-side-sell').className = side === 'sell' ? 'flex-1 btn-danger bg-red-500 hover:bg-red-600 text-white' : 'flex-1 btn-secondary';
+            document.getElementById('futures-action-btn').innerText = side === 'buy' ? 'Open Long Contract' : 'Open Short Contract';
+        }
+
+        function updateMarginLeverage(val) {
+            document.getElementById('margin-leverage-display').innerText = val + 'x';
+            calculateMarginTotal();
+        }
+
+        function updateFuturesLeverage(val) {
+            document.getElementById('futures-leverage-display').innerText = val + 'x';
+            calculateFuturesTotal();
+        }
+
+        function setSpotAmount(percent) {
+            const balance = State.userData?.balance || 0;
+            const amount = (balance * percent / 100).toFixed(2);
+            document.getElementById('spot-amount').value = amount;
+            calculateSpotTotal();
+        }
+
+        function calculateSpotTotal() {
+            const amount = parseFloat(document.getElementById('spot-amount').value) || 0;
+            document.getElementById('spot-total').innerText = '₹' + amount.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+        }
+
+        function calculateMarginTotal() {
+            const amount = parseFloat(document.getElementById('margin-amount').value) || 0;
+            const leverage = parseInt(document.getElementById('margin-leverage').value) || 1;
+            const position = amount * leverage;
+            
+            document.getElementById('margin-position').innerText = '₹' + position.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+            document.getElementById('margin-required').innerText = '₹' + amount.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+            
+            // Calculate liquidation price (simplified)
+            const liqPrice = State.marginPrice * (1 - (0.9 / leverage));
+            document.getElementById('margin-liq').innerText = '$' + liqPrice.toFixed(2);
+        }
+
+        function calculateFuturesTotal() {
+            const amount = parseFloat(document.getElementById('futures-amount').value) || 0;
+            const leverage = parseInt(document.getElementById('futures-leverage').value) || 1;
+            const notional = amount * leverage;
+            
+            document.getElementById('futures-notional').innerText = '₹' + notional.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+            document.getElementById('futures-margin').innerText = '₹' + amount.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+            
+            // Calculate liquidation price
+            const liqPrice = State.futuresPrice * (1 - (0.95 / leverage));
+            document.getElementById('futures-liq').innerText = '$' + liqPrice.toFixed(2);
+        }
+
+        async function executeSpotTrade() {
+            const amount = parseFloat(document.getElementById('spot-amount').value);
+            if (!amount || amount <= 0) return alert("Enter valid amount");
+            
+            const balance = State.userData?.balance || 0;
+            if (amount > balance) return alert("Insufficient balance");
+
+            showLoader();
+            try {
+                const coin = document.getElementById('spot-coin-select').value;
+                await db.collection('trades').add({
+                    uid: State.user.uid,
+                    type: 'spot',
+                    side: State.tradeSide,
+                    coin: coin,
+                    amount: amount,
+                    price: State.spotPrice,
+                    status: 'filled',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                await db.collection('users').doc(State.user.uid).update({
+                    balance: firebase.firestore.FieldValue.increment(-amount)
+                });
+
+                alert(`Spot ${State.tradeSide} order executed successfully!`);
+                document.getElementById('spot-amount').value = '';
+                calculateSpotTotal();
+                loadUserPositions();
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
+            hideLoader();
+        }
+
+        async function executeMarginTrade() {
+            const amount = parseFloat(document.getElementById('margin-amount').value);
+            const leverage = parseInt(document.getElementById('margin-leverage').value);
+            
+            if (!amount || amount <= 0) return alert("Enter valid amount");
+            
+            const balance = State.userData?.balance || 0;
+            if (amount > balance) return alert("Insufficient margin");
+
+            showLoader();
+            try {
+                const coin = document.getElementById('margin-coin-select').value;
+                await db.collection('trades').add({
+                    uid: State.user.uid,
+                    type: 'margin',
+                    side: State.marginSide,
+                    coin: coin,
+                    amount: amount,
+                    leverage: leverage,
+                    price: State.marginPrice,
+                    status: 'open',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                await db.collection('users').doc(State.user.uid).update({
+                    balance: firebase.firestore.FieldValue.increment(-amount)
+                });
+
+                alert(`Margin ${State.marginSide} position opened at ${leverage}x!`);
+                document.getElementById('margin-amount').value = '';
+                calculateMarginTotal();
+                loadUserPositions();
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
+            hideLoader();
+        }
+
+        async function executeFuturesTrade() {
+            const amount = parseFloat(document.getElementById('futures-amount').value);
+            const leverage = parseInt(document.getElementById('futures-leverage').value);
+            
+            if (!amount || amount <= 0) return alert("Enter valid amount");
+            
+            const balance = State.userData?.balance || 0;
+            if (amount > balance) return alert("Insufficient margin");
+
+            if (leverage > 20) {
+                if (!confirm(`Warning: ${leverage}x leverage is extremely risky. Continue?`)) return;
+            }
+
+            showLoader();
+            try {
+                const coin = document.getElementById('futures-coin-select').value;
+                await db.collection('trades').add({
+                    uid: State.user.uid,
+                    type: 'futures',
+                    side: State.futuresSide,
+                    coin: coin,
+                    amount: amount,
+                    leverage: leverage,
+                    price: State.futuresPrice,
+                    status: 'open',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                await db.collection('users').doc(State.user.uid).update({
+                    balance: firebase.firestore.FieldValue.increment(-amount)
+                });
+
+                alert(`Futures ${State.futuresSide} contract opened at ${leverage}x leverage!`);
+                document.getElementById('futures-amount').value = '';
+                calculateFuturesTotal();
+                loadUserPositions();
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
+            hideLoader();
+        }
+
+        function loadUserPositions() {
+            if (!State.user) return;
+            
+            db.collection('trades').where('uid', '==', State.user.uid)
+              .where('status', 'in', ['open', 'filled'])
+              .orderBy('createdAt', 'desc')
+              .onSnapshot(snap => {
+                  const spotOrders = document.getElementById('spot-orders');
+                  const marginPositions = document.getElementById('margin-positions');
+                  const futuresPositions = document.getElementById('futures-positions');
+                  
+                  let spotHtml = '';
+                  let marginHtml = '';
+                  let futuresHtml = '';
+                  
+                  if (snap.empty) {
+                      spotHtml = '<p class="text-center text-gray-500 text-sm py-4">No open orders</p>';
+                      marginHtml = '<p class="text-center text-gray-500 text-sm py-4">No active positions</p>';
+                      futuresHtml = '<p class="text-center text-gray-500 text-sm py-4">No open contracts</p>';
+                  } else {
+                      snap.forEach(doc => {
+                          const trade = doc.data();
+                          const date = trade.createdAt ? trade.createdAt.toDate().toLocaleDateString() : 'Now';
+                          
+                          if (trade.type === 'spot') {
+                              spotHtml += `
+                                  <div class="list-item">
+                                      <div class="flex-1">
+                                          <h4 class="font-bold text-sm capitalize">${trade.side} ${trade.coin}</h4>
+                                          <p class="text-[10px] text-gray-500">${date} • $${trade.price.toLocaleString()}</p>
+                                      </div>
+                                      <div class="text-right">
+                                          <p class="font-mono font-bold text-sm">₹${trade.amount.toLocaleString()}</p>
+                                          <span class="badge badge-primary text-[10px]">${trade.status}</span>
+                                      </div>
+                                  </div>
+                              `;
+                          } else if (trade.type === 'margin') {
+                              marginHtml += `
+                                  <div class="position-card">
+                                      <div class="flex justify-between items-center mb-2">
+                                          <h4 class="font-bold text-sm capitalize">${trade.side} ${trade.coin} <span class="text-trade">${trade.leverage}x</span></h4>
+                                          <span class="badge badge-trade text-[10px]">Open</span>
+                                      </div>
+                                      <div class="grid grid-cols-2 gap-2 text-xs">
+                                          <div><span class="text-gray-500">Margin:</span> ₹${trade.amount.toLocaleString()}</div>
+                                          <div><span class="text-gray-500">Entry:</span> $${trade.price.toLocaleString()}</div>
+                                      </div>
+                                  </div>
+                              `;
+                          } else if (trade.type === 'futures') {
+                              futuresHtml += `
+                                  <div class="position-card">
+                                      <div class="flex justify-between items-center mb-2">
+                                          <h4 class="font-bold text-sm capitalize">${trade.side} ${trade.coin} <span class="text-trade">${trade.leverage}x</span></h4>
+                                          <span class="badge badge-trade text-[10px]">Open</span>
+                                      </div>
+                                      <div class="grid grid-cols-2 gap-2 text-xs">
+                                          <div><span class="text-gray-500">Margin:</span> ₹${trade.amount.toLocaleString()}</div>
+                                          <div><span class="text-gray-500">Notional:</span> ₹${(trade.amount * trade.leverage).toLocaleString()}</div>
+                                      </div>
+                                  </div>
+                              `;
+                          }
+                      });
+                  }
+                  
+                  spotOrders.innerHTML = spotHtml || '<p class="text-center text-gray-500 text-sm py-4">No open orders</p>';
+                  marginPositions.innerHTML = marginHtml || '<p class="text-center text-gray-500 text-sm py-4">No active positions</p>';
+                  futuresPositions.innerHTML = futuresHtml || '<p class="text-center text-gray-500 text-sm py-4">No open contracts</p>';
+              });
+        }
+
         // --- Navigation & UI ---
         function switchPage(page, btnEl = null) {
             document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
@@ -1438,6 +2334,11 @@
                 if(mobBtn) mobBtn.classList.add('active');
             }
             window.scrollTo(0,0);
+        }
+
+        function toggleSideMenu() {
+            document.getElementById('side-menu').classList.toggle('open');
+            document.getElementById('side-menu-overlay').classList.toggle('open');
         }
 
         function switchWalletTab(tab, el) {
@@ -1629,4 +2530,4 @@
 
     </script>
 </body>
-</html>
+    </html>
